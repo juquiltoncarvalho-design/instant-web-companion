@@ -1,0 +1,67 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { generateText, Output } from "ai";
+import { z } from "zod";
+import { createLovableAiGateway } from "@/lib/ai-gateway.server";
+
+const ActionSchema = z.object({
+  reply: z.string(),
+  actions: z.array(
+    z.object({
+      room: z.string().nullable(),
+      device: z.enum(["light", "window", "ac", "tv", "scene"]),
+      op: z.string(),
+      value: z.union([z.string(), z.number(), z.boolean()]).nullable(),
+    }),
+  ),
+});
+
+const SYSTEM_PROMPT = `Es um assistente de casa inteligente em portugues. Recebes um comando do utilizador e o estado atual da casa em JSON, e respondes com JSON no formato {reply, actions}.
+
+Divisoes disponiveis: sala, quarto1, quarto2, cozinha, banheiro, corredor.
+Dispositivos por divisao: light (on/off), window (open/close), ac (on/off + temperatura), tv (on/off + canal 1-8 + volume 0-100).
+
+Cenas globais (room=null): op="morning" acende tudo, op="night" apaga tudo, op="leaving" apaga+fecha tudo.
+
+Operacoes validas:
+- light: op="on" ou "off"
+- window: op="open" ou "close"
+- ac: op="on" (value=temperatura), "off"
+- tv: op="on", "off", "channel" (value=numero), "volume" (value=0-100), "mute"
+- scene: op="morning", "night", "leaving"
+
+Responde curto e amigavel em portugues. Se o utilizador pergunta algo (temperatura, estado), responde na "reply" e deixa "actions" vazio.`;
+
+export const Route = createFileRoute("/api/ai-command")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        try {
+          const body = (await request.json()) as { message: string; state: unknown };
+          const key = process.env.LOVABLE_API_KEY;
+          if (!key) throw new Error("LOVABLE_API_KEY missing");
+
+          const gateway = createLovableAiGateway(key);
+          const { output } = await generateText({
+            model: gateway("google/gemini-3-flash-preview"),
+            output: Output.object({ schema: ActionSchema }),
+            messages: [
+              { role: "system", content: SYSTEM_PROMPT },
+              {
+                role: "user",
+                content: `Estado atual: ${JSON.stringify(body.state)}\n\nComando: ${body.message}`,
+              },
+            ],
+          });
+          return Response.json(output);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "erro";
+          console.error("ai-command error:", msg);
+          return Response.json(
+            { reply: `Desculpa, tive um problema: ${msg}`, actions: [] },
+            { status: 200 },
+          );
+        }
+      },
+    },
+  },
+});
