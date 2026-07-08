@@ -44,13 +44,8 @@ export const Route = createFileRoute("/api/ai-command")({
           const { output } = await generateText({
             model: gateway("google/gemini-3-flash-preview"),
             output: Output.object({ schema: ActionSchema }),
-            messages: [
-              { role: "system", content: SYSTEM_PROMPT },
-              {
-                role: "user",
-                content: `Estado atual: ${JSON.stringify(body.state)}\n\nComando: ${body.message}`,
-              },
-            ],
+            system: SYSTEM_PROMPT,
+            prompt: `Estado atual: ${JSON.stringify(body.state)}\n\nComando: ${body.message}`,
           });
           return Response.json(output);
         } catch (err) {
