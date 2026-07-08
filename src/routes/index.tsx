@@ -320,7 +320,7 @@ function HomeAutomation() {
           osc.type = "sine"
           osc.frequency.value = freq
           gain.gain.setValueAtTime(0.15, time + i * 0.1)
-          gain.gain.exponentialDecayTo?.(0.01, time + i * 0.1 + 0.15) || gain.gain.setValueAtTime(0.01, time + i * 0.1 + 0.15)
+          gain.gain.exponentialRampToValueAtTime(0.01, time + i * 0.1 + 0.15)
           osc.start(time + i * 0.1)
           osc.stop(time + i * 0.1 + 0.15)
         })
