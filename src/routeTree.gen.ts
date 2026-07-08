@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PomodoroRouteImport } from './routes/pomodoro'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPomodoroRouteImport } from './routes/api/pomodoro'
 
 const PomodoroRoute = PomodoroRouteImport.update({
   id: '/pomodoro',
@@ -22,31 +23,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPomodoroRoute = ApiPomodoroRouteImport.update({
+  id: '/api/pomodoro',
+  path: '/api/pomodoro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/pomodoro': typeof PomodoroRoute
+  '/api/pomodoro': typeof ApiPomodoroRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/pomodoro': typeof PomodoroRoute
+  '/api/pomodoro': typeof ApiPomodoroRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/pomodoro': typeof PomodoroRoute
+  '/api/pomodoro': typeof ApiPomodoroRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/pomodoro'
+  fullPaths: '/' | '/pomodoro' | '/api/pomodoro'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/pomodoro'
-  id: '__root__' | '/' | '/pomodoro'
+  to: '/' | '/pomodoro' | '/api/pomodoro'
+  id: '__root__' | '/' | '/pomodoro' | '/api/pomodoro'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PomodoroRoute: typeof PomodoroRoute
+  ApiPomodoroRoute: typeof ApiPomodoroRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/pomodoro': {
+      id: '/api/pomodoro'
+      path: '/api/pomodoro'
+      fullPath: '/api/pomodoro'
+      preLoaderRoute: typeof ApiPomodoroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PomodoroRoute: PomodoroRoute,
+  ApiPomodoroRoute: ApiPomodoroRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
