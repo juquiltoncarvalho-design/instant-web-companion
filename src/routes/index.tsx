@@ -246,6 +246,7 @@ function Dashboard() {
         });
         const data = (await res.json()) as { reply: string; actions: Array<{ room: string; device: string; op: string; value: number }> };
         setMessages((m) => [...m, { id: crypto.randomUUID(), role: "assistant", content: data.reply, ts: Date.now() }]);
+        void speak(data.reply);
         logActivity(data.reply.slice(0, 80), "ai");
 
         // Apply actions
@@ -296,32 +297,85 @@ function Dashboard() {
     void askAI(t);
   };
 
-  // ------------- Voice -------------
-  const recRef = useRef<any>(null);
-  const startVoice = () => {
-    const SR: any = (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition;
-    if (!SR) {
-      alert("Reconhecimento de voz não suportado neste browser.");
-      return;
+  // ------------- Voice (real STT + TTS via Lovable AI) -------------
+  const recRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const ttsAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const speak = useCallback(async (text: string) => {
+    try {
+      if (ttsAudioRef.current) {
+        ttsAudioRef.current.pause();
+        ttsAudioRef.current.src = "";
+      }
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      ttsAudioRef.current = audio;
+      audio.onended = () => URL.revokeObjectURL(url);
+      await audio.play().catch(() => {});
+    } catch {}
+  }, []);
+
+  const startVoice = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mime = MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : MediaRecorder.isTypeSupported("audio/mp4")
+          ? "audio/mp4"
+          : "";
+      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      rec.onstop = async () => {
+        setListening(false);
+        streamRef.current?.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
+        if (blob.size < 800) return;
+        try {
+          setAiLoading(true);
+          const fd = new FormData();
+          fd.append("file", blob, "recording");
+          const res = await fetch("/api/stt", { method: "POST", body: fd });
+          if (!res.ok) throw new Error("stt");
+          const { text } = (await res.json()) as { text: string };
+          const t = text.trim();
+          if (!t) {
+            setAiLoading(false);
+            return;
+          }
+          setAiInput("");
+          setAiLoading(false);
+          void askAI(t);
+        } catch {
+          setAiLoading(false);
+        }
+      };
+      rec.start();
+      recRef.current = rec;
+      setListening(true);
+    } catch {
+      alert("Não foi possível aceder ao microfone.");
+      setListening(false);
     }
-    const rec = new SR();
-    rec.lang = "pt-PT";
-    rec.continuous = false;
-    rec.interimResults = false;
-    rec.onresult = (e: any) => {
-      const t = e.results[0][0].transcript as string;
-      setAiInput(t);
-      void askAI(t);
-    };
-    rec.onend = () => setListening(false);
-    rec.onerror = () => setListening(false);
-    rec.start();
-    recRef.current = rec;
-    setListening(true);
   };
   const stopVoice = () => {
-    recRef.current?.stop();
-    setListening(false);
+    try {
+      recRef.current?.stop();
+    } catch {}
+    recRef.current = null;
   };
 
   // ------------- Derived -------------
