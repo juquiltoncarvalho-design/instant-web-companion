@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { generateText, Output } from "ai";
+import { generateText, Output, NoObjectGeneratedError } from "ai";
 import { z } from "zod";
 import { createLovableAiGateway } from "@/lib/ai-gateway.server";
 
@@ -49,6 +49,20 @@ export const Route = createFileRoute("/api/ai-command")({
           });
           return Response.json(output);
         } catch (err) {
+          if (NoObjectGeneratedError.isInstance(err)) {
+            console.error("ai raw text:", err.text);
+            // Try to salvage
+            try {
+              const jsonMatch = err.text?.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                const parsed = JSON.parse(jsonMatch[0]);
+                if (parsed.reply) return Response.json({ reply: parsed.reply, actions: parsed.actions ?? [] });
+              }
+            } catch {
+              // fall through
+            }
+            return Response.json({ reply: err.text?.slice(0, 240) ?? "Não percebi.", actions: [] });
+          }
           const msg = err instanceof Error ? err.message : "erro";
           console.error("ai-command error:", msg);
           return Response.json(
