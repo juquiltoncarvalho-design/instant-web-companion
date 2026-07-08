@@ -130,7 +130,8 @@ function useHomeState() {
   const push = useCallback(async (next: HomeState) => {
     localVersion.current += 1;
     setState(next);
-    await supabase.from("home_state").upsert({ id: 1, state: next as unknown as Record<string, unknown>, updated_at: new Date().toISOString() });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await supabase.from("home_state").upsert({ id: 1, state: next as any, updated_at: new Date().toISOString() });
   }, []);
 
   return { state, ready, push };
