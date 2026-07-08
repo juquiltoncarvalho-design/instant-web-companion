@@ -244,7 +244,7 @@ function Dashboard() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text, state }),
         });
-        const data = (await res.json()) as { reply: string; actions: Array<{ room: string | null; device: string; op: string; value: string | number | boolean | null }> };
+        const data = (await res.json()) as { reply: string; actions: Array<{ room: string; device: string; op: string; value: number }> };
         setMessages((m) => [...m, { id: crypto.randomUUID(), role: "assistant", content: data.reply, ts: Date.now() }]);
         logActivity(data.reply.slice(0, 80), "ai");
 
