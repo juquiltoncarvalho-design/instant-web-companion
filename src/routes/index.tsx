@@ -315,8 +315,6 @@ function Dashboard() {
   const recRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
-  const ttsAudioRef = useRef<HTMLAudioElement | null>(null);
-  void ttsAudioRef;
 
   const startVoice = async () => {
     try {
