@@ -26,7 +26,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { WeatherCard } from "@/components/weather-card";
+import { GlassWeatherCard } from "@/components/glass-weather-card";
 
 // ---------------- Types ----------------
 interface RoomState {
@@ -130,7 +130,7 @@ function useHomeState() {
   const push = useCallback(async (next: HomeState) => {
     localVersion.current += 1;
     setState(next);
-    await supabase.from("home_state").upsert({ id: 1, state: next, updated_at: new Date().toISOString() });
+    await supabase.from("home_state").upsert({ id: 1, state: next as unknown as Record<string, unknown>, updated_at: new Date().toISOString() });
   }, []);
 
   return { state, ready, push };
@@ -380,7 +380,7 @@ function Dashboard() {
         {/* Left column */}
         <div className="col-span-12 lg:col-span-8 flex flex-col gap-4 md:gap-6">
           {/* Weather */}
-          <WeatherCard />
+          <GlassWeatherCard />
 
           {/* Scenes */}
           <div className="grid grid-cols-3 gap-3">
