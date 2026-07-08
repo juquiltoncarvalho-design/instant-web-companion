@@ -7,10 +7,10 @@ const ActionSchema = z.object({
   reply: z.string(),
   actions: z.array(
     z.object({
-      room: z.string().nullable(),
-      device: z.enum(["light", "window", "ac", "tv", "scene"]),
-      op: z.string(),
-      value: z.union([z.string(), z.number(), z.boolean()]).nullable(),
+      room: z.string().describe("room id like 'sala' or empty string for global scene"),
+      device: z.string().describe("one of: light, window, ac, tv, scene"),
+      op: z.string().describe("operation like on/off/open/close/morning/night/leaving/channel/volume/mute"),
+      value: z.number().describe("numeric value for temperature/channel/volume, or 0 if not applicable"),
     }),
   ),
 });
