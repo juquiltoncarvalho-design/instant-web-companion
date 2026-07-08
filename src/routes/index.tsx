@@ -373,7 +373,7 @@ function Dashboard() {
             </Link>
             <div className="text-right">
               <div className="text-4xl md:text-5xl font-mono font-light tracking-tighter tabular-nums">{timeStr}</div>
-              <p className="text-muted-foreground text-sm capitalize">{dateStr}</p>
+              <p className="text-muted-foreground text-sm first-letter:uppercase">{dateStr}</p>
             </div>
           </div>
         </header>
