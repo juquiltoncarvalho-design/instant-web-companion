@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PomodoroRouteImport } from './routes/pomodoro'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPomodoroRouteImport } from './routes/api/pomodoro'
+import { Route as ApiAiCommandRouteImport } from './routes/api/ai-command'
 
 const PomodoroRoute = PomodoroRouteImport.update({
   id: '/pomodoro',
@@ -28,34 +29,43 @@ const ApiPomodoroRoute = ApiPomodoroRouteImport.update({
   path: '/api/pomodoro',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiCommandRoute = ApiAiCommandRouteImport.update({
+  id: '/api/ai-command',
+  path: '/api/ai-command',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/pomodoro': typeof PomodoroRoute
+  '/api/ai-command': typeof ApiAiCommandRoute
   '/api/pomodoro': typeof ApiPomodoroRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/pomodoro': typeof PomodoroRoute
+  '/api/ai-command': typeof ApiAiCommandRoute
   '/api/pomodoro': typeof ApiPomodoroRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/pomodoro': typeof PomodoroRoute
+  '/api/ai-command': typeof ApiAiCommandRoute
   '/api/pomodoro': typeof ApiPomodoroRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/pomodoro' | '/api/pomodoro'
+  fullPaths: '/' | '/pomodoro' | '/api/ai-command' | '/api/pomodoro'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/pomodoro' | '/api/pomodoro'
-  id: '__root__' | '/' | '/pomodoro' | '/api/pomodoro'
+  to: '/' | '/pomodoro' | '/api/ai-command' | '/api/pomodoro'
+  id: '__root__' | '/' | '/pomodoro' | '/api/ai-command' | '/api/pomodoro'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PomodoroRoute: typeof PomodoroRoute
+  ApiAiCommandRoute: typeof ApiAiCommandRoute
   ApiPomodoroRoute: typeof ApiPomodoroRoute
 }
 
@@ -82,24 +92,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPomodoroRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai-command': {
+      id: '/api/ai-command'
+      path: '/api/ai-command'
+      fullPath: '/api/ai-command'
+      preLoaderRoute: typeof ApiAiCommandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PomodoroRoute: PomodoroRoute,
+  ApiAiCommandRoute: ApiAiCommandRoute,
   ApiPomodoroRoute: ApiPomodoroRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

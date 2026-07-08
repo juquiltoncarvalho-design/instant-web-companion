@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          meta: Json | null
+          role: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          role: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          role?: string
+        }
+        Relationships: []
+      }
+      home_state: {
+        Row: {
+          id: number
+          state: Json
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          state?: Json
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          state?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
