@@ -246,7 +246,21 @@ function Dashboard() {
         });
         const data = (await res.json()) as { reply: string; actions: Array<{ room: string; device: string; op: string; value: number }> };
         setMessages((m) => [...m, { id: crypto.randomUUID(), role: "assistant", content: data.reply, ts: Date.now() }]);
-        void speak(data.reply);
+        void (async () => {
+          try {
+            const r = await fetch("/api/tts", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: data.reply }),
+            });
+            if (!r.ok) return;
+            const blob = await r.blob();
+            const url = URL.createObjectURL(blob);
+            const audio = new Audio(url);
+            audio.onended = () => URL.revokeObjectURL(url);
+            await audio.play().catch(() => {});
+          } catch {}
+        })();
         logActivity(data.reply.slice(0, 80), "ai");
 
         // Apply actions
@@ -302,27 +316,7 @@ function Dashboard() {
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const ttsAudioRef = useRef<HTMLAudioElement | null>(null);
-
-  const speak = useCallback(async (text: string) => {
-    try {
-      if (ttsAudioRef.current) {
-        ttsAudioRef.current.pause();
-        ttsAudioRef.current.src = "";
-      }
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-      if (!res.ok) return;
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      ttsAudioRef.current = audio;
-      audio.onended = () => URL.revokeObjectURL(url);
-      await audio.play().catch(() => {});
-    } catch {}
-  }, []);
+  void ttsAudioRef;
 
   const startVoice = async () => {
     try {
