@@ -156,6 +156,15 @@ function Dashboard() {
   const [aiLoading, setAiLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<string>("sala");
+  const [sirenOn, setSirenOn] = useState(false);
+  const sirenRef = useRef<EmergencySiren | null>(null);
+
+  const setSiren = useCallback((on: boolean) => {
+    if (!sirenRef.current) sirenRef.current = new EmergencySiren();
+    if (on) sirenRef.current.start();
+    else sirenRef.current.stop();
+    setSirenOn(on);
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
