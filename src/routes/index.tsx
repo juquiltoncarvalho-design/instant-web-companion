@@ -24,8 +24,10 @@ import {
   ChevronDown,
   Volume2,
   VolumeX,
+  Siren,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { EmergencySiren } from "@/lib/emergency-siren";
 import { GlassWeatherCard } from "@/components/glass-weather-card";
 
 // ---------------- Types ----------------
@@ -145,7 +147,7 @@ function Dashboard() {
     {
       id: "welcome",
       role: "assistant",
-      content: "Olá! Diz-me algo como \"acender a luz da sala\" ou \"modo noite\".",
+      content: "Olá! Sou a Ana, a assistente da tua casa inteligente. Diz-me, por exemplo: \"Ana, acende a luz da sala\", \"modo noite\", \"inicia o Pomodoro\" ou \"sirene de emergência\".",
       ts: Date.now(),
     },
   ]);
@@ -154,6 +156,15 @@ function Dashboard() {
   const [aiLoading, setAiLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<string>("sala");
+  const [sirenOn, setSirenOn] = useState(false);
+  const sirenRef = useRef<EmergencySiren | null>(null);
+
+  const setSiren = useCallback((on: boolean) => {
+    if (!sirenRef.current) sirenRef.current = new EmergencySiren();
+    if (on) sirenRef.current.start();
+    else sirenRef.current.stop();
+    setSirenOn(on);
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
@@ -277,6 +288,24 @@ function Dashboard() {
               }
               continue;
             }
+            if (a.device === "siren") {
+              const on = a.op === "on";
+              setSiren(on);
+              logActivity(on ? "Sirene de emergência ATIVADA" : "Sirene de emergência desligada", "scene");
+              continue;
+            }
+            if (a.device === "pomodoro") {
+              const op = a.op === "start" ? "start" : a.op === "pause" ? "pause" : a.op === "stop" ? "stop" : a.op === "reset" ? "reset" : null;
+              if (op) {
+                void fetch("/api/pomodoro", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ action: op }),
+                }).catch(() => {});
+                logActivity(`Pomodoro: ${op === "start" ? "iniciado" : op === "pause" ? "em pausa" : op === "stop" ? "parado" : "reiniciado"}`, "ai");
+              }
+              continue;
+            }
             if (!a.room || !next.rooms[a.room]) continue;
             const r = { ...next.rooms[a.room] };
             if (a.device === "light") r.light = a.op === "on";
@@ -301,7 +330,7 @@ function Dashboard() {
         setAiLoading(false);
       }
     },
-    [state, push, logActivity],
+    [state, push, logActivity, setSiren],
   );
 
   const submitAI = () => {
@@ -410,6 +439,22 @@ function Dashboard() {
             </h1>
           </div>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => {
+                const next = !sirenOn;
+                setSiren(next);
+                logActivity(next ? "Sirene de emergência ATIVADA" : "Sirene de emergência desligada", "scene");
+              }}
+              title="Sirene de emergência"
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition ${
+                sirenOn
+                  ? "border-destructive bg-destructive text-destructive-foreground animate-pulse"
+                  : "border-border bg-card hover:bg-accent text-muted-foreground"
+              }`}
+            >
+              <Siren className="w-4 h-4" />
+              {sirenOn ? "Sirene ligada" : "Sirene"}
+            </button>
             <Link
               to="/pomodoro"
               className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card hover:bg-accent transition text-sm"
@@ -520,7 +565,7 @@ function Dashboard() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${aiLoading ? "bg-amber-400 animate-pulse" : "bg-emerald-400"}`} />
-                <h3 className="font-medium">Assistente AI</h3>
+                <h3 className="font-medium">Ana — Assistente de Voz</h3>
               </div>
               <div className="flex items-center gap-1 text-xs text-muted-foreground"><Wifi className="w-3 h-3" /> Tempo real</div>
             </div>
@@ -554,7 +599,7 @@ function Dashboard() {
                 value={aiInput}
                 onChange={(e) => setAiInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && submitAI()}
-                placeholder="Ex: acende a luz da sala..."
+                placeholder="Ex: Ana, acende a luz da sala..."
                 className="flex-1 bg-muted border border-border rounded-full px-4 py-2 text-sm focus:outline-none focus:border-primary/60"
               />
               <button
@@ -638,8 +683,8 @@ function SceneButton({ icon: Icon, label, onClick }: { icon: any; label: string;
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Casa Inteligente — Dashboard IoT" },
-      { name: "description", content: "Dashboard premium de casa inteligente com IA real, sincronização em tempo real, clima e Pomodoro IoT." },
+      { title: "Ana — Casa Inteligente" },
+      { name: "description", content: "Dashboard de casa inteligente com a assistente de voz Ana, sincronização em tempo real, clima, sirene de emergência e Pomodoro IoT." },
     ],
   }),
   ssr: false,
