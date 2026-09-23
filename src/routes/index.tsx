@@ -330,7 +330,7 @@ function Dashboard() {
         setAiLoading(false);
       }
     },
-    [state, push, logActivity],
+    [state, push, logActivity, setSiren],
   );
 
   const submitAI = () => {
@@ -439,6 +439,22 @@ function Dashboard() {
             </h1>
           </div>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => {
+                const next = !sirenOn;
+                setSiren(next);
+                logActivity(next ? "Sirene de emergência ATIVADA" : "Sirene de emergência desligada", "scene");
+              }}
+              title="Sirene de emergência"
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition ${
+                sirenOn
+                  ? "border-destructive bg-destructive text-destructive-foreground animate-pulse"
+                  : "border-border bg-card hover:bg-accent text-muted-foreground"
+              }`}
+            >
+              <Siren className="w-4 h-4" />
+              {sirenOn ? "Sirene ligada" : "Sirene"}
+            </button>
             <Link
               to="/pomodoro"
               className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card hover:bg-accent transition text-sm"
