@@ -683,8 +683,8 @@ function SceneButton({ icon: Icon, label, onClick }: { icon: any; label: string;
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Casa Inteligente — Dashboard IoT" },
-      { name: "description", content: "Dashboard premium de casa inteligente com IA real, sincronização em tempo real, clima e Pomodoro IoT." },
+      { title: "Ana — Casa Inteligente" },
+      { name: "description", content: "Dashboard de casa inteligente com a assistente de voz Ana, sincronização em tempo real, clima, sirene de emergência e Pomodoro IoT." },
     ],
   }),
   ssr: false,
