@@ -565,7 +565,7 @@ function Dashboard() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${aiLoading ? "bg-amber-400 animate-pulse" : "bg-emerald-400"}`} />
-                <h3 className="font-medium">Assistente AI</h3>
+                <h3 className="font-medium">Ana — Assistente de Voz</h3>
               </div>
               <div className="flex items-center gap-1 text-xs text-muted-foreground"><Wifi className="w-3 h-3" /> Tempo real</div>
             </div>
@@ -599,7 +599,7 @@ function Dashboard() {
                 value={aiInput}
                 onChange={(e) => setAiInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && submitAI()}
-                placeholder="Ex: acende a luz da sala..."
+                placeholder="Ex: Ana, acende a luz da sala..."
                 className="flex-1 bg-muted border border-border rounded-full px-4 py-2 text-sm focus:outline-none focus:border-primary/60"
               />
               <button
