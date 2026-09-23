@@ -24,8 +24,10 @@ import {
   ChevronDown,
   Volume2,
   VolumeX,
+  Siren,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { EmergencySiren } from "@/lib/emergency-siren";
 import { GlassWeatherCard } from "@/components/glass-weather-card";
 
 // ---------------- Types ----------------
@@ -145,7 +147,7 @@ function Dashboard() {
     {
       id: "welcome",
       role: "assistant",
-      content: "Olá! Diz-me algo como \"acender a luz da sala\" ou \"modo noite\".",
+      content: "Olá! Sou a Ana, a assistente da tua casa inteligente. Diz-me, por exemplo: \"Ana, acende a luz da sala\", \"modo noite\", \"inicia o Pomodoro\" ou \"sirene de emergência\".",
       ts: Date.now(),
     },
   ]);
