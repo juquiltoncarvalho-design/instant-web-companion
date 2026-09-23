@@ -288,6 +288,24 @@ function Dashboard() {
               }
               continue;
             }
+            if (a.device === "siren") {
+              const on = a.op === "on";
+              setSiren(on);
+              logActivity(on ? "Sirene de emergência ATIVADA" : "Sirene de emergência desligada", "scene");
+              continue;
+            }
+            if (a.device === "pomodoro") {
+              const op = a.op === "start" ? "start" : a.op === "pause" ? "pause" : a.op === "stop" ? "stop" : a.op === "reset" ? "reset" : null;
+              if (op) {
+                void fetch("/api/pomodoro", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ action: op }),
+                }).catch(() => {});
+                logActivity(`Pomodoro: ${op === "start" ? "iniciado" : op === "pause" ? "em pausa" : op === "stop" ? "parado" : "reiniciado"}`, "ai");
+              }
+              continue;
+            }
             if (!a.room || !next.rooms[a.room]) continue;
             const r = { ...next.rooms[a.room] };
             if (a.device === "light") r.light = a.op === "on";
