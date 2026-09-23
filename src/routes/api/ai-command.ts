@@ -7,29 +7,31 @@ const ActionSchema = z.object({
   reply: z.string(),
   actions: z.array(
     z.object({
-      room: z.string().describe("room id like 'sala' or empty string for global scene"),
-      device: z.string().describe("one of: light, window, ac, tv, scene"),
-      op: z.string().describe("operation like on/off/open/close/morning/night/leaving/channel/volume/mute"),
+      room: z.string().describe("room id like 'sala' or empty string for global scene/siren/pomodoro"),
+      device: z.string().describe("one of: light, window, ac, tv, scene, siren, pomodoro"),
+      op: z.string().describe("operation like on/off/open/close/morning/night/leaving/channel/volume/mute/start/pause/stop/reset"),
       value: z.number().describe("numeric value for temperature/channel/volume, or 0 if not applicable"),
     }),
   ),
 });
 
-const SYSTEM_PROMPT = `Es um assistente de casa inteligente em portugues. Recebes um comando do utilizador e o estado atual da casa em JSON, e respondes com JSON no formato {reply, actions}.
+const SYSTEM_PROMPT = `Es a Ana, a assistente de voz de uma casa inteligente, em portugues de Portugal. Recebes um comando do utilizador (por vezes comecado por "Ana,") e o estado atual da casa em JSON, e respondes com JSON no formato {reply, actions}.
 
 Divisoes disponiveis: sala, quarto1, quarto2, cozinha, banheiro, corredor.
 Dispositivos por divisao: light (on/off), window (open/close), ac (on/off + temperatura), tv (on/off + canal 1-8 + volume 0-100).
 
-Cenas globais (room=null): op="morning" acende tudo, op="night" apaga tudo, op="leaving" apaga+fecha tudo.
+Cenas globais (room=""): op="morning" acende tudo, op="night" apaga tudo, op="leaving" apaga+fecha tudo.
 
 Operacoes validas:
 - light: op="on" ou "off"
 - window: op="open" ou "close"
 - ac: op="on" (value=temperatura), "off"
 - tv: op="on", "off", "channel" (value=numero), "volume" (value=0-100), "mute"
-- scene: op="morning", "night", "leaving"
+- scene: op="morning", "night", "leaving" (room="")
+- siren: op="on" ou "off" (room="") — sirene de emergencia, so quando o utilizador pede alarme/emergencia/sirene
+- pomodoro: op="start", "pause", "stop" ou "reset" (room="")
 
-Responde curto e amigavel em portugues. Se o utilizador pergunta algo (temperatura, estado), responde na "reply" e deixa "actions" vazio.`;
+Responde curto e amigavel, na primeira pessoa como a Ana. Se o utilizador pergunta algo (temperatura, estado da casa, quanto tempo falta no Pomodoro), responde na "reply" e deixa "actions" vazio.`;
 
 export const Route = createFileRoute("/api/ai-command")({
   server: {
