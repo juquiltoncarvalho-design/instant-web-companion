@@ -1,3 +1,4 @@
+import { WifiCard } from "@/components/wifi-card";
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -62,7 +63,7 @@ const QUARTOS = [
   { id: "quarto1", nome: "Quarto Principal", Icon: BedDouble, cor: "oklch(0.68 0.2 300)", tv: true },
   { id: "quarto2", nome: "Quarto 2", Icon: BedDouble, cor: "oklch(0.72 0.17 350)", tv: true },
   { id: "cozinha", nome: "Cozinha", Icon: ChefHat, cor: "oklch(0.75 0.17 140)", tv: true },
-  { id: "banheiro", nome: "Banheiro", Icon: Bath, cor: "oklch(0.75 0.13 200)", tv: false },
+  { id: "banheiro", nome: "Casa de Banho", Icon: Bath, cor: "oklch(0.75 0.13 200)", tv: false },
   { id: "corredor", nome: "Corredor", Icon: DoorOpen, cor: "oklch(0.8 0.15 90)", tv: false },
 ] as const;
 
@@ -473,6 +474,7 @@ function Dashboard() {
         <div className="col-span-12 lg:col-span-8 flex flex-col gap-4 md:gap-6">
           {/* Weather */}
           <GlassWeatherCard />
+          <WifiCard />
 
           {/* Scenes */}
           <div className="grid grid-cols-3 gap-3">

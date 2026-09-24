@@ -35,9 +35,9 @@ function PomodoroPage() {
     const prev = prevStatusRef.current
     if (prev && prev !== "finished" && state.status === "finished") {
       const isFoco = state.mode === "focus"
-      const titulo = isFoco ? "Sessao de foco concluida!" : "Pausa terminada!"
+      const titulo = isFoco ? "Sessão de foco concluída!" : "Pausa terminada!"
       const mensagem = isFoco
-        ? "Bom trabalho! Esta na hora de fazer uma pausa."
+        ? "Bom trabalho! Está na hora de fazer uma pausa."
         : "A pausa terminou. Pronto para voltar ao foco?"
 
       // Notificacao do sistema (se permitida e nao estiver em modo nao-interromper)
@@ -56,7 +56,7 @@ function PomodoroPage() {
     prevStatusRef.current = state.status
   }, [state])
 
-  // Pedir permissao para notificacoes ao carregar
+  // Pedir permissao para notificações ao carregar
   useEffect(() => {
     if (typeof Notification !== "undefined" && Notification.permission === "default") {
       Notification.requestPermission()
@@ -129,8 +129,8 @@ function PomodoroPage() {
                   <Moon className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Modo Focus</p>
-                  <p className="text-xs text-muted-foreground">Silencia notificacoes do sistema</p>
+                  <p className="text-sm font-semibold text-foreground">Modo Foco</p>
+                  <p className="text-xs text-muted-foreground">Silencia notificações do sistema</p>
                 </div>
               </div>
               <Switch
