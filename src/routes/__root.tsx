@@ -1,4 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { installClickSound } from "@/lib/click-sound";
 import {
   Outlet,
   Link,
@@ -122,6 +124,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => installClickSound(), []);
 
   return (
     <QueryClientProvider client={queryClient}>

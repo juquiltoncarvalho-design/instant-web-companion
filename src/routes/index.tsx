@@ -58,12 +58,12 @@ interface ActivityEntry {
 
 // ---------------- Constants ----------------
 const QUARTOS = [
-  { id: "sala", nome: "Sala de Estar", Icon: Sofa },
-  { id: "quarto1", nome: "Quarto Principal", Icon: BedDouble },
-  { id: "quarto2", nome: "Quarto 2", Icon: BedDouble },
-  { id: "cozinha", nome: "Cozinha", Icon: ChefHat },
-  { id: "banheiro", nome: "Banheiro", Icon: Bath },
-  { id: "corredor", nome: "Corredor", Icon: DoorOpen },
+  { id: "sala", nome: "Sala de Estar", Icon: Sofa, cor: "oklch(0.72 0.17 55)", tv: true },
+  { id: "quarto1", nome: "Quarto Principal", Icon: BedDouble, cor: "oklch(0.68 0.2 300)", tv: true },
+  { id: "quarto2", nome: "Quarto 2", Icon: BedDouble, cor: "oklch(0.72 0.17 350)", tv: true },
+  { id: "cozinha", nome: "Cozinha", Icon: ChefHat, cor: "oklch(0.75 0.17 140)", tv: true },
+  { id: "banheiro", nome: "Banheiro", Icon: Bath, cor: "oklch(0.75 0.13 200)", tv: false },
+  { id: "corredor", nome: "Corredor", Icon: DoorOpen, cor: "oklch(0.8 0.15 90)", tv: false },
 ] as const;
 
 const CANAIS_TV = ["SIC", "TVI", "RTP1", "Sport TV", "Disney", "CNN", "Netflix", "HBO"];
@@ -491,14 +491,22 @@ function Dashboard() {
                 <div
                   key={q.id}
                   onClick={() => setSelectedRoom(q.id)}
-                  className={`rounded-3xl bg-card border p-5 cursor-pointer transition-all ${isSel ? "border-primary/60 glow-primary" : "border-border hover:border-border/60"}`}
+                  style={{
+                    borderColor: isSel ? q.cor : `color-mix(in oklab, ${q.cor} 35%, transparent)`,
+                    backgroundImage: `linear-gradient(135deg, color-mix(in oklab, ${q.cor} 16%, transparent), transparent 70%)`,
+                    boxShadow: isSel ? `0 8px 32px -8px color-mix(in oklab, ${q.cor} 55%, transparent)` : undefined,
+                  }}
+                  className="rounded-3xl bg-card border p-5 cursor-pointer transition-all"
                 >
                   <div className="flex justify-between items-center mb-5">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${r.light ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{ color: q.cor, background: `color-mix(in oklab, ${q.cor} ${r.light ? 30 : 14}%, transparent)` }}
+                      >
                         <q.Icon className="w-5 h-5" />
                       </div>
-                      <h3 className="font-medium">{q.nome}</h3>
+                      <h3 className="font-medium" style={{ color: q.cor }}>{q.nome}</h3>
                     </div>
                     {active > 0 ? (
                       <span className="text-[11px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-full font-medium">{active} ativo</span>
@@ -510,7 +518,7 @@ function Dashboard() {
                     <TileButton active={r.light} icon={Lightbulb} label="Luz" onClick={(e) => { e.stopPropagation(); toggleLight(q.id); }} />
                     <TileButton active={r.window} icon={Blinds} label={r.window ? "Aberta" : "Fechada"} onClick={(e) => { e.stopPropagation(); toggleWindow(q.id); }} />
                     <TileButton active={r.ac.on} icon={Snowflake} label={r.ac.on ? `AC ${r.ac.temp}°` : "AC"} onClick={(e) => { e.stopPropagation(); toggleAC(q.id); }} />
-                    <TileButton active={r.tv.on} icon={Tv} label={r.tv.on ? CANAIS_TV[r.tv.channel - 1] : "TV"} onClick={(e) => { e.stopPropagation(); toggleTV(q.id); }} />
+                    {q.tv && <TileButton active={r.tv.on} icon={Tv} label={r.tv.on ? CANAIS_TV[r.tv.channel - 1] : "TV"} onClick={(e) => { e.stopPropagation(); toggleTV(q.id); }} />}
                   </div>
                 </div>
               );
@@ -539,7 +547,7 @@ function Dashboard() {
                 </div>
               </div>
               {/* TV */}
-              <div className="rounded-2xl bg-muted/40 border border-border p-4">
+              {selMeta.tv && <div className="rounded-2xl bg-muted/40 border border-border p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground"><Tv className="w-4 h-4" /> Televisão</div>
                   <button onClick={() => toggleTV(selectedRoom)} className={`text-xs px-2 py-1 rounded-full ${roomSel.tv.on ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{roomSel.tv.on ? "Ligada" : "Desligada"}</button>
@@ -553,7 +561,7 @@ function Dashboard() {
                   <button onClick={() => changeVolume(selectedRoom, 5)} className="w-9 h-9 rounded-lg bg-muted hover:bg-accent flex items-center justify-center"><Volume2 className="w-4 h-4" /></button>
                   <button onClick={() => toggleMute(selectedRoom)} className={`w-9 h-9 rounded-lg flex items-center justify-center ${roomSel.tv.mute ? "bg-destructive/20 text-destructive" : "bg-muted hover:bg-accent"}`}>{roomSel.tv.mute ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}</button>
                 </div>
-              </div>
+              </div>}
             </div>
           </div>
         </div>
