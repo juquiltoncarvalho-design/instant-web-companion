@@ -27,6 +27,7 @@ import {
   Volume2,
   VolumeX,
   Siren,
+  Flame,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { EmergencySiren } from "@/lib/emergency-siren";
@@ -163,8 +164,13 @@ function Dashboard() {
 
   const setSiren = useCallback((on: boolean) => {
     if (!sirenRef.current) sirenRef.current = new EmergencySiren();
-    if (on) sirenRef.current.start();
-    else sirenRef.current.stop();
+    if (on) {
+      sirenRef.current.start();
+      // Liga automaticamente para o número de emergência (Portugal)
+      setTimeout(() => {
+        window.location.href = "tel:+351923346087";
+      }, 300);
+    } else sirenRef.current.stop();
     setSirenOn(on);
   }, []);
 
@@ -441,6 +447,17 @@ function Dashboard() {
             </h1>
           </div>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => {
+                setSiren(true);
+                logActivity("🔥 Simulação de FOGO: sirene ativada e chamada para 923 346 087", "scene");
+              }}
+              title="Simular fogo"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground text-sm transition"
+            >
+              <Flame className="w-4 h-4" />
+              Fogo
+            </button>
             <button
               onClick={() => {
                 const next = !sirenOn;
