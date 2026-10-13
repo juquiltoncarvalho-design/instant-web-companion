@@ -9,31 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as PomodoroRouteImport } from './routes/pomodoro'
-import { Route as ApiAiCommandRouteImport } from './routes/api/ai-command'
-import { Route as ApiPomodoroRouteImport } from './routes/api/pomodoro'
-import { Route as ApiSttRouteImport } from './routes/api/stt'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
+import { Route as ApiSttRouteImport } from './routes/api/stt'
+import { Route as ApiPomodoroRouteImport } from './routes/api/pomodoro'
+import { Route as ApiAiCommandRouteImport } from './routes/api/ai-command'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PomodoroRoute = PomodoroRouteImport.update({
   id: '/pomodoro',
   path: '/pomodoro',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAiCommandRoute = ApiAiCommandRouteImport.update({
-  id: '/api/ai-command',
-  path: '/api/ai-command',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPomodoroRoute = ApiPomodoroRouteImport.update({
-  id: '/api/pomodoro',
-  path: '/api/pomodoro',
+const ApiTtsRoute = ApiTtsRouteImport.update({
+  id: '/api/tts',
+  path: '/api/tts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSttRoute = ApiSttRouteImport.update({
@@ -41,9 +36,14 @@ const ApiSttRoute = ApiSttRouteImport.update({
   path: '/api/stt',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiTtsRoute = ApiTtsRouteImport.update({
-  id: '/api/tts',
-  path: '/api/tts',
+const ApiPomodoroRoute = ApiPomodoroRouteImport.update({
+  id: '/api/pomodoro',
+  path: '/api/pomodoro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiCommandRoute = ApiAiCommandRouteImport.update({
+  id: '/api/ai-command',
+  path: '/api/ai-command',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -110,13 +110,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/pomodoro': {
       id: '/pomodoro'
       path: '/pomodoro'
@@ -124,18 +117,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PomodoroRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/ai-command': {
-      id: '/api/ai-command'
-      path: '/api/ai-command'
-      fullPath: '/api/ai-command'
-      preLoaderRoute: typeof ApiAiCommandRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/pomodoro': {
-      id: '/api/pomodoro'
-      path: '/api/pomodoro'
-      fullPath: '/api/pomodoro'
-      preLoaderRoute: typeof ApiPomodoroRouteImport
+    '/api/tts': {
+      id: '/api/tts'
+      path: '/api/tts'
+      fullPath: '/api/tts'
+      preLoaderRoute: typeof ApiTtsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/stt': {
@@ -145,11 +138,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSttRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/tts': {
-      id: '/api/tts'
-      path: '/api/tts'
-      fullPath: '/api/tts'
-      preLoaderRoute: typeof ApiTtsRouteImport
+    '/api/pomodoro': {
+      id: '/api/pomodoro'
+      path: '/api/pomodoro'
+      fullPath: '/api/pomodoro'
+      preLoaderRoute: typeof ApiPomodoroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai-command': {
+      id: '/api/ai-command'
+      path: '/api/ai-command'
+      fullPath: '/api/ai-command'
+      preLoaderRoute: typeof ApiAiCommandRouteImport
       parentRoute: typeof rootRouteImport
     }
   }

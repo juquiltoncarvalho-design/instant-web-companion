@@ -1,3 +1,4 @@
+import { FloorPlan } from "@/components/floor-plan";
 import { WifiCard } from "@/components/wifi-card";
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
