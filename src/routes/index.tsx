@@ -470,8 +470,31 @@ function Dashboard() {
           </div>
         </header>
 
+        <FloorPlan
+          quartos={QUARTOS}
+          rooms={state.rooms}
+          selected={selectedRoom}
+          onSelect={setSelectedRoom}
+          onToggleLight={toggleLight}
+          onSetAll={(k, on) => {
+            const rooms = Object.fromEntries(
+              QUARTOS.map((q) => {
+                const r = state.rooms[q.id] ?? defaultRoom();
+                const n =
+                  k === "light" ? { ...r, light: on } :
+                  k === "window" ? { ...r, window: on } :
+                  k === "ac" ? { ...r, ac: { ...r.ac, on } } :
+                  q.tv ? { ...r, tv: { ...r.tv, on } } : r;
+                return [q.id, n];
+              }),
+            );
+            void push({ rooms });
+            logActivity(`${k === "light" ? "Luzes" : k === "window" ? "Janelas" : k === "ac" ? "Ar condicionado" : "Televisões"} ${on ? "ligados" : "desligados"} em toda a casa`, k);
+          }}
+        />
+
         {/* Left column */}
-        <div className="col-span-12 lg:col-span-8 flex flex-col gap-4 md:gap-6">
+        <div id="divisoes" className="col-span-12 lg:col-span-8 flex flex-col gap-4 md:gap-6">
           {/* Weather */}
           <GlassWeatherCard />
           <WifiCard />
