@@ -1,5 +1,5 @@
 import planta from "@/assets/planta.jpg.asset.json";
-import { Lightbulb, Blinds, Snowflake, Tv, ChevronRight, Home } from "lucide-react";
+import { Lightbulb, DoorOpen, Tv, ChevronRight, Home } from "lucide-react";
 import type { ComponentType } from "react";
 
 interface Room {
@@ -21,8 +21,8 @@ const POS: Record<string, { x: number; y: number }> = {
   banheiro: { x: 54.1, y: 10.5 },
   quarto2: { x: 80.1, y: 23.8 },
   corredor: { x: 58, y: 42.9 },
-  sala: { x: 33.1, y: 61.3 },
-  cozinha: { x: 73.6, y: 62.3 },
+  sala: { x: 46, y: 67 },
+  cozinha: { x: 87, y: 63 },
 };
 
 export function FloorPlan({
@@ -48,8 +48,7 @@ export function FloorPlan({
     });
   const geral = [
     { k: "light" as const, label: "Luzes", Icon: Lightbulb },
-    { k: "window" as const, label: "Janelas", Icon: Blinds },
-    { k: "ac" as const, label: "Ar Condicionado", Icon: Snowflake },
+    { k: "window" as const, label: "Portas", Icon: DoorOpen },
     { k: "tv" as const, label: "Televisões", Icon: Tv },
   ];
 
