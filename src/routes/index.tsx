@@ -22,7 +22,6 @@ import {
   LogOut,
   Wifi,
   Blinds,
-  DoorOpen,
   ChevronUp,
   ChevronDown,
   Volume2,
