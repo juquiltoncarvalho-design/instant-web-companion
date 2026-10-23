@@ -22,6 +22,7 @@ import {
   LogOut,
   Wifi,
   Blinds,
+  DoorOpen,
   ChevronUp,
   ChevronDown,
   Volume2,
@@ -202,7 +203,13 @@ function Dashboard() {
     const cur = state.rooms[roomId] ?? defaultRoom();
     updateRoom(roomId, (r) => ({ ...r, window: !r.window }));
     const room = QUARTOS.find((q) => q.id === roomId);
-    logActivity(`Janela ${cur.window ? "fechada" : "aberta"} - ${room?.nome ?? roomId}`, "window");
+    logActivity(`Porta ${cur.window ? "fechada" : "aberta"} - ${room?.nome ?? roomId}`, "window");
+    if (!cur.window) {
+      window.setTimeout(() => {
+        updateRoom(roomId, (r) => ({ ...r, window: false }));
+        logActivity(`Porta fechada automaticamente - ${room?.nome ?? roomId}`, "window");
+      }, 30000);
+    }
   };
   const toggleAC = (roomId: string) => {
     const cur = state.rooms[roomId] ?? defaultRoom();
@@ -507,7 +514,7 @@ function Dashboard() {
               }),
             );
             void push({ rooms });
-            logActivity(`${k === "light" ? "Luzes" : k === "window" ? "Janelas" : k === "ac" ? "Ar condicionado" : "Televisões"} ${on ? "ligados" : "desligados"} em toda a casa`, k);
+            logActivity(k === "window" ? `Portas ${on ? "abertas" : "fechadas"} em toda a casa` : `${k === "light" ? "Luzes" : k === "ac" ? "Ar condicionado" : "Televisões"} ${on ? "ligados" : "desligados"} em toda a casa`, k);
           }}
         />
 
@@ -559,8 +566,7 @@ function Dashboard() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <TileButton active={r.light} icon={Lightbulb} label="Luz" onClick={(e) => { e.stopPropagation(); toggleLight(q.id); }} />
-                    <TileButton active={r.window} icon={Blinds} label={r.window ? "Aberta" : "Fechada"} onClick={(e) => { e.stopPropagation(); toggleWindow(q.id); }} />
-                    <TileButton active={r.ac.on} icon={Snowflake} label={r.ac.on ? `AC ${r.ac.temp}°` : "AC"} onClick={(e) => { e.stopPropagation(); toggleAC(q.id); }} />
+                    <TileButton active={r.window} icon={DoorOpen} label={r.window ? "Porta aberta" : "Porta fechada"} onClick={(e) => { e.stopPropagation(); toggleWindow(q.id); }} />
                     {q.tv && <TileButton active={r.tv.on} icon={Tv} label={r.tv.on ? CANAIS_TV[r.tv.channel - 1] : "TV"} onClick={(e) => { e.stopPropagation(); toggleTV(q.id); }} />}
                   </div>
                 </div>
@@ -577,17 +583,13 @@ function Dashboard() {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* AC */}
+              {/* Porta */}
               <div className="rounded-2xl bg-muted/40 border border-border p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground"><Snowflake className="w-4 h-4" /> Ar Condicionado</div>
-                  <button onClick={() => toggleAC(selectedRoom)} className={`text-xs px-2 py-1 rounded-full ${roomSel.ac.on ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{roomSel.ac.on ? "Ligado" : "Desligado"}</button>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground"><DoorOpen className="w-4 h-4" /> Porta</div>
+                  <button onClick={() => toggleWindow(selectedRoom)} className={`text-xs px-2 py-1 rounded-full ${roomSel.window ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{roomSel.window ? "Aberta" : "Fechada"}</button>
                 </div>
-                <div className="flex items-center justify-center gap-4">
-                  <button onClick={() => setACTemp(selectedRoom, -1)} className="w-10 h-10 rounded-xl bg-muted hover:bg-accent flex items-center justify-center"><ChevronDown className="w-5 h-5" /></button>
-                  <div className="text-3xl font-mono tabular-nums">{roomSel.ac.temp}°</div>
-                  <button onClick={() => setACTemp(selectedRoom, 1)} className="w-10 h-10 rounded-xl bg-muted hover:bg-accent flex items-center justify-center"><ChevronUp className="w-5 h-5" /></button>
-                </div>
+                <p className="text-xs text-muted-foreground">Abre e fecha à mão aqui. Quando abres, a porta fecha-se sozinha passados 30 segundos.</p>
               </div>
               {/* TV */}
               {selMeta.tv && <div className="rounded-2xl bg-muted/40 border border-border p-4">
