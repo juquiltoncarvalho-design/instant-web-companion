@@ -37,6 +37,7 @@ import { GlassWeatherCard } from "@/components/glass-weather-card";
 interface RoomState {
   light: boolean;
   window: boolean;
+  doorAuto: boolean;
   ac: { on: boolean; temp: number };
   tv: { on: boolean; channel: number; volume: number; mute: boolean };
 }
@@ -75,6 +76,7 @@ function defaultRoom(): RoomState {
   return {
     light: false,
     window: false,
+    doorAuto: true,
     ac: { on: false, temp: 22 },
     tv: { on: false, channel: 1, volume: 20, mute: false },
   };
@@ -205,12 +207,17 @@ function Dashboard() {
     updateRoom(roomId, (r) => ({ ...r, window: !r.window }));
     const room = QUARTOS.find((q) => q.id === roomId);
     logActivity(`Porta ${cur.window ? "fechada" : "aberta"} - ${room?.nome ?? roomId}`, "window");
-    if (!cur.window) {
+    if (!cur.window && (cur.doorAuto ?? true)) {
       window.setTimeout(() => {
         updateRoom(roomId, (r) => ({ ...r, window: false }));
         logActivity(`Porta fechada automaticamente - ${room?.nome ?? roomId}`, "window");
       }, 30000);
     }
+  };
+  const setDoorAuto = (roomId: string, auto: boolean) => {
+    updateRoom(roomId, (r) => ({ ...r, doorAuto: auto }));
+    const room = QUARTOS.find((q) => q.id === roomId);
+    logActivity(`Porta em modo ${auto ? "automático" : "manual"} - ${room?.nome ?? roomId}`, "window");
   };
   const toggleAC = (roomId: string) => {
     const cur = state.rooms[roomId] ?? defaultRoom();
@@ -590,7 +597,25 @@ function Dashboard() {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground"><DoorOpen className="w-4 h-4" /> Porta</div>
                   <button onClick={() => toggleWindow(selectedRoom)} className={`text-xs px-2 py-1 rounded-full ${roomSel.window ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{roomSel.window ? "Aberta" : "Fechada"}</button>
                 </div>
-                <p className="text-xs text-muted-foreground">Abre e fecha à mão aqui. Quando abres, a porta fecha-se sozinha passados 30 segundos.</p>
+                <div className="flex items-center gap-2 mb-3">
+                  <button
+                    onClick={() => setDoorAuto(selectedRoom, false)}
+                    className={`text-xs px-3 py-1.5 rounded-full font-medium ${!(roomSel.doorAuto ?? true) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"}`}
+                  >
+                    Manual
+                  </button>
+                  <button
+                    onClick={() => setDoorAuto(selectedRoom, true)}
+                    className={`text-xs px-3 py-1.5 rounded-full font-medium ${(roomSel.doorAuto ?? true) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"}`}
+                  >
+                    Automático
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {(roomSel.doorAuto ?? true)
+                    ? "Modo automático: a porta fecha-se sozinha aos 30 segundos, e as cenas e a Ana abrem e fecham por ti."
+                    : "Modo manual: abres e fechas tu, a porta fica como a deixares."}
+                </p>
               </div>
               {/* TV */}
               {selMeta.tv && <div className="rounded-2xl bg-muted/40 border border-border p-4">
