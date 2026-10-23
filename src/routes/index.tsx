@@ -192,6 +192,8 @@ function Dashboard() {
     },
     [state, push],
   );
+  const updateRoomRef = useRef(updateRoom);
+  updateRoomRef.current = updateRoom;
 
   const toggleLight = (roomId: string) => {
     const cur = state.rooms[roomId] ?? defaultRoom();
