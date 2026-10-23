@@ -37,6 +37,7 @@ import { GlassWeatherCard } from "@/components/glass-weather-card";
 interface RoomState {
   light: boolean;
   window: boolean;
+  doorAuto: boolean;
   ac: { on: boolean; temp: number };
   tv: { on: boolean; channel: number; volume: number; mute: boolean };
 }
@@ -75,6 +76,7 @@ function defaultRoom(): RoomState {
   return {
     light: false,
     window: false,
+    doorAuto: true,
     ac: { on: false, temp: 22 },
     tv: { on: false, channel: 1, volume: 20, mute: false },
   };
@@ -205,12 +207,17 @@ function Dashboard() {
     updateRoom(roomId, (r) => ({ ...r, window: !r.window }));
     const room = QUARTOS.find((q) => q.id === roomId);
     logActivity(`Porta ${cur.window ? "fechada" : "aberta"} - ${room?.nome ?? roomId}`, "window");
-    if (!cur.window) {
+    if (!cur.window && (cur.doorAuto ?? true)) {
       window.setTimeout(() => {
         updateRoom(roomId, (r) => ({ ...r, window: false }));
         logActivity(`Porta fechada automaticamente - ${room?.nome ?? roomId}`, "window");
       }, 30000);
     }
+  };
+  const setDoorAuto = (roomId: string, auto: boolean) => {
+    updateRoom(roomId, (r) => ({ ...r, doorAuto: auto }));
+    const room = QUARTOS.find((q) => q.id === roomId);
+    logActivity(`Porta em modo ${auto ? "automático" : "manual"} - ${room?.nome ?? roomId}`, "window");
   };
   const toggleAC = (roomId: string) => {
     const cur = state.rooms[roomId] ?? defaultRoom();
