@@ -597,7 +597,25 @@ function Dashboard() {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground"><DoorOpen className="w-4 h-4" /> Porta</div>
                   <button onClick={() => toggleWindow(selectedRoom)} className={`text-xs px-2 py-1 rounded-full ${roomSel.window ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{roomSel.window ? "Aberta" : "Fechada"}</button>
                 </div>
-                <p className="text-xs text-muted-foreground">Abre e fecha à mão aqui. Quando abres, a porta fecha-se sozinha passados 30 segundos.</p>
+                <div className="flex items-center gap-2 mb-3">
+                  <button
+                    onClick={() => setDoorAuto(selectedRoom, false)}
+                    className={`text-xs px-3 py-1.5 rounded-full font-medium ${!(roomSel.doorAuto ?? true) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"}`}
+                  >
+                    Manual
+                  </button>
+                  <button
+                    onClick={() => setDoorAuto(selectedRoom, true)}
+                    className={`text-xs px-3 py-1.5 rounded-full font-medium ${(roomSel.doorAuto ?? true) ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent"}`}
+                  >
+                    Automático
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {(roomSel.doorAuto ?? true)
+                    ? "Modo automático: a porta fecha-se sozinha aos 30 segundos, e as cenas e a Ana abrem e fecham por ti."
+                    : "Modo manual: abres e fechas tu, a porta fica como a deixares."}
+                </p>
               </div>
               {/* TV */}
               {selMeta.tv && <div className="rounded-2xl bg-muted/40 border border-border p-4">
