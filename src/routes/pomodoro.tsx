@@ -182,6 +182,10 @@ export const Route = createFileRoute("/pomodoro")({
     meta: [
       { title: "Pomodoro IoT — Casa Inteligente" },
       { name: "description", content: "Temporizador Pomodoro sincronizado com dispositivo ESP32." },
+      { property: "og:title", content: "Pomodoro IoT — Casa Inteligente" },
+      { property: "og:description", content: "Sessões de foco e pausas no temporizador da casa inteligente Ana." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: PomodoroPage,
