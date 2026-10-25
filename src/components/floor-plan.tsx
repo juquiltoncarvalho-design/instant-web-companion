@@ -1,5 +1,6 @@
 import planta from "@/assets/planta.jpg.asset.json";
-import { Lightbulb, DoorOpen, Tv, ChevronRight, Home } from "lucide-react";
+import { Lightbulb, DoorOpen, DoorClosed, Tv, ChevronRight, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { ComponentType } from "react";
 
 interface Room {
@@ -31,6 +32,7 @@ export function FloorPlan({
   selected,
   onSelect,
   onToggleLight,
+  onSetDoor,
   onSetAll,
 }: {
   quartos: readonly Quarto[];
@@ -38,6 +40,7 @@ export function FloorPlan({
   selected: string;
   onSelect: (id: string) => void;
   onToggleLight: (id: string) => void;
+  onSetDoor: (id: string, open: boolean) => void;
   onSetAll: (key: "light" | "window" | "ac" | "tv", on: boolean) => void;
 }) {
   const all = (k: "light" | "window" | "ac" | "tv") =>
@@ -105,6 +108,18 @@ export function FloorPlan({
       </div>
 
       <aside className="col-span-12 lg:col-span-3 flex flex-col gap-4">
+        <div className="rounded-lg border border-border bg-card/60 p-4">
+          <h3 className="font-medium">Porta — {quartos.find((q) => q.id === selected)?.nome}</h3>
+          <p role="status" className="my-3 text-sm text-muted-foreground">{rooms[selected]?.window ? "Porta aberta" : "Porta fechada"}</p>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant={rooms[selected]?.window ? "outline" : "default"} onClick={() => onSetDoor(selected, true)} disabled={rooms[selected]?.window}>
+              <DoorOpen /> Abrir
+            </Button>
+            <Button variant={rooms[selected]?.window ? "default" : "outline"} onClick={() => onSetDoor(selected, false)} disabled={!rooms[selected]?.window}>
+              <DoorClosed /> Fechar
+            </Button>
+          </div>
+        </div>
         <div className="rounded-2xl border border-border bg-card/60 p-4">
           <h3 className="mb-3 font-medium">Controlo Geral</h3>
           <div className="flex flex-col gap-3">
