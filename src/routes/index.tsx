@@ -1,4 +1,5 @@
 import { FloorPlan } from "@/components/floor-plan";
+import { Button } from "@/components/ui/button";
 import { WifiCard } from "@/components/wifi-card";
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
@@ -433,7 +434,7 @@ function Dashboard() {
     [state],
   );
   const roomSel = state.rooms[selectedRoom] ?? defaultRoom();
-  const selMeta = QUARTOS.find((q) => q.id === selectedRoom)!;
+  const selMeta = QUARTOS.find((q) => q.id === selectedRoom) ?? QUARTOS[0];
 
   const timeStr = now.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
   const dateStr = now.toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long" });
@@ -454,12 +455,9 @@ function Dashboard() {
               {greeting(now.getHours())}
             </p>
             <h1 className="text-3xl md:text-4xl font-light tracking-tight">
-              {totalRoomsActive === 0 ? (
-                <>Casa em <span className="text-primary">repouso</span>.</>
-              ) : (
-                <>{totalRoomsActive} {totalRoomsActive === 1 ? "divisão ativa" : "divisões ativas"}.</>
-              )}
+              Controlo da <span className="text-primary">casa</span>
             </h1>
+            <p className="mt-2 text-sm text-muted-foreground">{totalRoomsActive} {totalRoomsActive === 1 ? "divisão ativa" : "divisões ativas"}</p>
           </div>
           <div className="flex items-center gap-4">
             <button
@@ -509,6 +507,9 @@ function Dashboard() {
           selected={selectedRoom}
           onSelect={setSelectedRoom}
           onToggleLight={toggleLight}
+          onSetDoor={(id, open) => {
+            if ((state.rooms[id]?.window ?? false) !== open) toggleWindow(id);
+          }}
           onSetAll={(k, on) => {
             const rooms = Object.fromEntries(
               QUARTOS.map((q) => {
@@ -574,7 +575,7 @@ function Dashboard() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <TileButton active={r.light} icon={Lightbulb} label="Luz" onClick={(e) => { e.stopPropagation(); toggleLight(q.id); }} />
-                    <TileButton active={r.window} icon={DoorOpen} label={r.window ? "Porta aberta" : "Porta fechada"} onClick={(e) => { e.stopPropagation(); toggleWindow(q.id); }} />
+                    <TileButton active={r.window} icon={DoorOpen} label={r.window ? "Fechar porta" : "Abrir porta"} onClick={(e) => { e.stopPropagation(); toggleWindow(q.id); }} />
                     {q.tv && <TileButton active={r.tv.on} icon={Tv} label={r.tv.on ? CANAIS_TV[r.tv.channel - 1] : "TV"} onClick={(e) => { e.stopPropagation(); toggleTV(q.id); }} />}
                   </div>
                 </div>
@@ -595,8 +596,9 @@ function Dashboard() {
               <div className="rounded-2xl bg-muted/40 border border-border p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground"><DoorOpen className="w-4 h-4" /> Porta</div>
-                  <button onClick={() => toggleWindow(selectedRoom)} className={`text-xs px-2 py-1 rounded-full ${roomSel.window ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{roomSel.window ? "Aberta" : "Fechada"}</button>
+                  <span role="status" className="text-xs text-muted-foreground">{roomSel.window ? "Aberta" : "Fechada"}</span>
                 </div>
+                <Button className="w-full mb-3" onClick={() => toggleWindow(selectedRoom)}><DoorOpen />{roomSel.window ? "Fechar porta" : "Abrir porta"}</Button>
                 <div className="flex items-center gap-2 mb-3">
                   <button
                     onClick={() => setDoorAuto(selectedRoom, false)}
@@ -764,6 +766,10 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "Ana — Casa Inteligente" },
       { name: "description", content: "Dashboard de casa inteligente com a assistente de voz Ana, sincronização em tempo real, clima, sirene de emergência e Pomodoro IoT." },
+      { property: "og:title", content: "Ana — Casa Inteligente" },
+      { property: "og:description", content: "Controla as portas, as luzes e as televisões da tua casa com a Ana." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   ssr: false,
