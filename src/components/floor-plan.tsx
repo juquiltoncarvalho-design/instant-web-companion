@@ -1,5 +1,5 @@
 import planta from "@/assets/planta.jpg.asset.json";
-import { Lightbulb, DoorOpen, DoorClosed, Tv, ChevronRight, Home } from "lucide-react";
+import { Lightbulb, AppWindow, PanelTopClose, Tv, ChevronRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ComponentType } from "react";
 
@@ -16,6 +16,15 @@ interface Quarto {
   cor: string;
   tv: boolean;
 }
+
+const WIN: Record<string, { x: number; y: number }> = {
+  quarto1: { x: 6, y: 22 },
+  banheiro: { x: 54, y: 3 },
+  quarto2: { x: 95, y: 24 },
+  corredor: { x: 70, y: 42.9 },
+  sala: { x: 8, y: 70 },
+  cozinha: { x: 95, y: 75 },
+};
 
 const POS: Record<string, { x: number; y: number }> = {
   quarto1: { x: 20.7, y: 22.1 },
@@ -51,7 +60,7 @@ export function FloorPlan({
     });
   const geral = [
     { k: "light" as const, label: "Luzes", Icon: Lightbulb },
-    { k: "window" as const, label: "Portas", Icon: DoorOpen },
+    { k: "window" as const, label: "Janelas", Icon: AppWindow },
     { k: "tv" as const, label: "Televisões", Icon: Tv },
   ];
 
@@ -78,6 +87,28 @@ export function FloorPlan({
       <div className="col-span-12 lg:col-span-7 relative overflow-hidden rounded-2xl border border-border bg-card/60 p-2">
         <div className="relative">
           <img src={planta.url} alt="Planta da casa" className="w-full rounded-xl" />
+          {quartos.map((q) => {
+            const w = WIN[q.id];
+            if (!w) return null;
+            const open = rooms[q.id]?.window;
+            return (
+              <button
+                key={`w-${q.id}`}
+                onClick={() => { onSetDoor(q.id, !open); onSelect(q.id); }}
+                title={`Janela - ${q.nome}`}
+                aria-label={`Janela ${q.nome} ${open ? "aberta" : "fechada"}`}
+                className="absolute -translate-x-1/2 -translate-y-1/2"
+                style={{ left: `${w.x}%`, top: `${w.y}%` }}
+              >
+                <span
+                  className={`flex h-7 w-7 items-center justify-center rounded-md border-2 transition ${open ? "bg-primary text-primary-foreground" : "bg-background text-foreground"}`}
+                  style={{ borderColor: q.cor }}
+                >
+                  {open ? <AppWindow className="h-4 w-4" /> : <PanelTopClose className="h-4 w-4" />}
+                </span>
+              </button>
+            );
+          })}
           {quartos.map((q) => {
             const p = POS[q.id];
             const on = rooms[q.id]?.light;
@@ -109,14 +140,14 @@ export function FloorPlan({
 
       <aside className="col-span-12 lg:col-span-3 flex flex-col gap-4">
         <div className="rounded-lg border border-border bg-card/60 p-4">
-          <h3 className="font-medium">Porta — {quartos.find((q) => q.id === selected)?.nome}</h3>
-          <p role="status" className="my-3 text-sm text-muted-foreground">{rooms[selected]?.window ? "Porta aberta" : "Porta fechada"}</p>
+          <h3 className="font-medium">Janela — {quartos.find((q) => q.id === selected)?.nome}</h3>
+          <p role="status" className="my-3 text-sm text-muted-foreground">{rooms[selected]?.window ? "Janela aberta" : "Janela fechada"}</p>
           <div className="grid grid-cols-2 gap-2">
             <Button variant={rooms[selected]?.window ? "outline" : "default"} onClick={() => onSetDoor(selected, true)} disabled={rooms[selected]?.window}>
-              <DoorOpen /> Abrir
+              <AppWindow /> Abrir
             </Button>
             <Button variant={rooms[selected]?.window ? "default" : "outline"} onClick={() => onSetDoor(selected, false)} disabled={!rooms[selected]?.window}>
-              <DoorClosed /> Fechar
+              <PanelTopClose /> Fechar
             </Button>
           </div>
         </div>
