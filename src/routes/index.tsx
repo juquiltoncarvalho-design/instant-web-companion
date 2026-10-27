@@ -325,6 +325,7 @@ function Dashboard() {
             if (a.device === "siren") {
               const on = a.op === "on";
               setSiren(on);
+              if (on) for (const id of Object.keys(next.rooms)) next.rooms[id] = { ...next.rooms[id], window: true };
               logActivity(on ? "Sirene de emergência ATIVADA" : "Sirene de emergência desligada", "scene");
               continue;
             }
