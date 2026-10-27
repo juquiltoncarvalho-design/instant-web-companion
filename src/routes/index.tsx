@@ -166,10 +166,13 @@ function Dashboard() {
   const [sirenOn, setSirenOn] = useState(false);
   const sirenRef = useRef<EmergencySiren | null>(null);
 
+  const openAllWindowsRef = useRef<() => void>(() => {});
   const setSiren = useCallback((on: boolean) => {
     if (!sirenRef.current) sirenRef.current = new EmergencySiren();
     if (on) {
       sirenRef.current.start();
+      // Emergência: abre todas as janelas da casa
+      openAllWindowsRef.current();
       // Liga automaticamente para o número de emergência (Portugal)
       setTimeout(() => {
         window.location.href = "tel:+351923346087";
@@ -197,6 +200,12 @@ function Dashboard() {
   );
   const updateRoomRef = useRef(updateRoom);
   updateRoomRef.current = updateRoom;
+  openAllWindowsRef.current = () => {
+    const rooms: HomeState["rooms"] = {};
+    for (const [id, r] of Object.entries(state.rooms)) rooms[id] = { ...r, window: true };
+    void push({ ...state, rooms });
+    logActivity("🚨 Emergência: todas as janelas foram abertas", "window");
+  };
 
   const toggleLight = (roomId: string) => {
     const cur = state.rooms[roomId] ?? defaultRoom();
@@ -316,6 +325,7 @@ function Dashboard() {
             if (a.device === "siren") {
               const on = a.op === "on";
               setSiren(on);
+              if (on) for (const id of Object.keys(next.rooms)) next.rooms[id] = { ...next.rooms[id], window: true };
               logActivity(on ? "Sirene de emergência ATIVADA" : "Sirene de emergência desligada", "scene");
               continue;
             }
