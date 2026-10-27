@@ -11,6 +11,7 @@ import {
   Sofa,
   Bath,
   DoorOpen,
+  AppWindow,
   Tv,
   Snowflake,
   Send,
@@ -207,18 +208,18 @@ function Dashboard() {
     const cur = state.rooms[roomId] ?? defaultRoom();
     updateRoom(roomId, (r) => ({ ...r, window: !r.window }));
     const room = QUARTOS.find((q) => q.id === roomId);
-    logActivity(`Porta ${cur.window ? "fechada" : "aberta"} - ${room?.nome ?? roomId}`, "window");
+    logActivity(`Janela ${cur.window ? "fechada" : "aberta"} - ${room?.nome ?? roomId}`, "window");
     if (!cur.window && (cur.doorAuto ?? true)) {
       window.setTimeout(() => {
         updateRoom(roomId, (r) => ({ ...r, window: false }));
-        logActivity(`Porta fechada automaticamente - ${room?.nome ?? roomId}`, "window");
+        logActivity(`Janela fechada automaticamente - ${room?.nome ?? roomId}`, "window");
       }, 30000);
     }
   };
   const setDoorAuto = (roomId: string, auto: boolean) => {
     updateRoom(roomId, (r) => ({ ...r, doorAuto: auto }));
     const room = QUARTOS.find((q) => q.id === roomId);
-    logActivity(`Porta em modo ${auto ? "automático" : "manual"} - ${room?.nome ?? roomId}`, "window");
+    logActivity(`Janela em modo ${auto ? "automático" : "manual"} - ${room?.nome ?? roomId}`, "window");
   };
   const toggleAC = (roomId: string) => {
     const cur = state.rooms[roomId] ?? defaultRoom();
@@ -523,7 +524,7 @@ function Dashboard() {
               }),
             );
             void push({ rooms });
-            logActivity(k === "window" ? `Portas ${on ? "abertas" : "fechadas"} em toda a casa` : `${k === "light" ? "Luzes" : k === "ac" ? "Ar condicionado" : "Televisões"} ${on ? "ligados" : "desligados"} em toda a casa`, k);
+            logActivity(k === "window" ? `Janelas ${on ? "abertas" : "fechadas"} em toda a casa` : `${k === "light" ? "Luzes" : k === "ac" ? "Ar condicionado" : "Televisões"} ${on ? "ligados" : "desligados"} em toda a casa`, k);
           }}
         />
 
@@ -575,7 +576,7 @@ function Dashboard() {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <TileButton active={r.light} icon={Lightbulb} label="Luz" onClick={(e) => { e.stopPropagation(); toggleLight(q.id); }} />
-                    <TileButton active={r.window} icon={DoorOpen} label={r.window ? "Fechar porta" : "Abrir porta"} onClick={(e) => { e.stopPropagation(); toggleWindow(q.id); }} />
+                    <TileButton active={r.window} icon={AppWindow} label={r.window ? "Fechar janela" : "Abrir janela"} onClick={(e) => { e.stopPropagation(); toggleWindow(q.id); }} />
                     {q.tv && <TileButton active={r.tv.on} icon={Tv} label={r.tv.on ? CANAIS_TV[r.tv.channel - 1] : "TV"} onClick={(e) => { e.stopPropagation(); toggleTV(q.id); }} />}
                   </div>
                 </div>
@@ -595,10 +596,10 @@ function Dashboard() {
               {/* Porta */}
               <div className="rounded-2xl bg-muted/40 border border-border p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground"><DoorOpen className="w-4 h-4" /> Porta</div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground"><AppWindow className="w-4 h-4" /> Janela</div>
                   <span role="status" className="text-xs text-muted-foreground">{roomSel.window ? "Aberta" : "Fechada"}</span>
                 </div>
-                <Button className="w-full mb-3" onClick={() => toggleWindow(selectedRoom)}><DoorOpen />{roomSel.window ? "Fechar porta" : "Abrir porta"}</Button>
+                <Button className="w-full mb-3" onClick={() => toggleWindow(selectedRoom)}><AppWindow />{roomSel.window ? "Fechar janela" : "Abrir janela"}</Button>
                 <div className="flex items-center gap-2 mb-3">
                   <button
                     onClick={() => setDoorAuto(selectedRoom, false)}
@@ -615,8 +616,8 @@ function Dashboard() {
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {(roomSel.doorAuto ?? true)
-                    ? "Modo automático: a porta fecha-se sozinha aos 30 segundos, e as cenas e a Ana abrem e fecham por ti."
-                    : "Modo manual: abres e fechas tu, a porta fica como a deixares."}
+                    ? "Modo automático: a janela fecha-se sozinha aos 30 segundos, e as cenas e a Ana abrem e fecham por ti."
+                    : "Modo manual: abres e fechas tu, a janela fica como a deixares."}
                 </p>
               </div>
               {/* TV */}
@@ -767,7 +768,7 @@ export const Route = createFileRoute("/")({
       { title: "Ana — Casa Inteligente" },
       { name: "description", content: "Dashboard de casa inteligente com a assistente de voz Ana, sincronização em tempo real, clima, sirene de emergência e Pomodoro IoT." },
       { property: "og:title", content: "Ana — Casa Inteligente" },
-      { property: "og:description", content: "Controla as portas, as luzes e as televisões da tua casa com a Ana." },
+      { property: "og:description", content: "Controla as janelas, as luzes e as televisões da tua casa com a Ana." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
