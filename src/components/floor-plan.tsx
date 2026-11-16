@@ -1,4 +1,4 @@
-import planta from "@/assets/planta.jpg.asset.json";
+import planta from "@/assets/planta.jpg";
 import { Lightbulb, AppWindow, PanelTopClose, Tv, ChevronRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ComponentType } from "react";
@@ -86,7 +86,7 @@ export function FloorPlan({
 
       <div className="col-span-12 lg:col-span-7 relative overflow-hidden rounded-2xl border border-border bg-card/60 p-2">
         <div className="relative">
-          <img src={planta.url} alt="Planta da casa" className="w-full rounded-xl" />
+          <img src={planta} alt="Planta da casa" className="w-full rounded-xl" />
           {quartos.map((q) => {
             const w = WIN[q.id];
             if (!w) return null;
