@@ -176,7 +176,7 @@ function tocarAlarme() {
   }
 }
 
-export const Route = createFileRoute("/pomodoro")({
+export const Route = createFileRoute("/_authenticated/pomodoro")({
   ssr: false,
   head: () => ({
     meta: [

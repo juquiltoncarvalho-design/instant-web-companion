@@ -34,6 +34,11 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { EmergencySiren } from "@/lib/emergency-siren";
 import { GlassWeatherCard } from "@/components/glass-weather-card";
+import { authFetch } from "@/lib/auth-fetch";
+import { useHomes } from "@/lib/use-homes";
+import { AppHeader } from "@/components/app-header";
+import { PresenceCard } from "@/components/presence-card";
+import { confirmCritical } from "@/components/confirm-critical";
 
 // ---------------- Types ----------------
 interface RoomState {
@@ -46,6 +51,7 @@ interface RoomState {
 
 interface HomeState {
   rooms: Record<string, RoomState>;
+  siren?: boolean;
 }
 
 interface ChatMsg {
@@ -98,33 +104,34 @@ function greeting(hour: number): string {
 }
 
 // ---------------- Hook: realtime home state ----------------
-function useHomeState() {
+function useHomeState(homeId: string | null) {
   const [state, setState] = useState<HomeState>(defaultHome);
   const [ready, setReady] = useState(false);
   const localVersion = useRef(0);
 
   useEffect(() => {
+    if (!homeId) return;
     let mounted = true;
     (async () => {
-      const { data } = await supabase.from("home_state").select("state").eq("id", 1).maybeSingle();
+      const { data } = await supabase.from("home_states").select("state").eq("home_id", homeId).maybeSingle();
       if (!mounted) return;
       const remote = (data?.state as HomeState | undefined) ?? null;
       const merged: HomeState = remote?.rooms
-        ? { rooms: { ...defaultHome().rooms, ...remote.rooms } }
+        ? { ...remote, rooms: { ...defaultHome().rooms, ...remote.rooms } }
         : defaultHome();
       setState(merged);
       setReady(true);
     })();
 
     const ch = supabase
-      .channel("home_state_rt")
+      .channel(`home_state_${homeId}`)
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "home_state" },
+        { event: "UPDATE", schema: "public", table: "home_states", filter: `home_id=eq.${homeId}` },
         (payload) => {
           const newState = (payload.new as { state: HomeState }).state;
           if (newState?.rooms) {
-            setState({ rooms: { ...defaultHome().rooms, ...newState.rooms } });
+            setState({ ...newState, rooms: { ...defaultHome().rooms, ...newState.rooms } });
           }
         },
       )
@@ -134,21 +141,24 @@ function useHomeState() {
       mounted = false;
       supabase.removeChannel(ch);
     };
-  }, []);
+  }, [homeId]);
 
   const push = useCallback(async (next: HomeState) => {
+    if (!homeId) return;
     localVersion.current += 1;
     setState(next);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await supabase.from("home_state").upsert({ id: 1, state: next as any, updated_at: new Date().toISOString() });
-  }, []);
+    await supabase.from("home_states").update({ state: next as any }).eq("home_id", homeId);
+  }, [homeId]);
 
   return { state, ready, push };
 }
 
 // ---------------- Component ----------------
 function Dashboard() {
-  const { state, push } = useHomeState();
+  const homes = useHomes();
+  const { state, push } = useHomeState(homes.current?.id ?? null);
+  const canControl = homes.current?.role === "owner" || homes.current?.role === "member";
   const [now, setNow] = useState(new Date());
   const [messages, setMessages] = useState<ChatMsg[]>([
     {
@@ -167,7 +177,9 @@ function Dashboard() {
   const sirenRef = useRef<EmergencySiren | null>(null);
 
   const openAllWindowsRef = useRef<() => void>(() => {});
+  const sirenStateRef = useRef<(on: boolean) => void>(() => {});
   const setSiren = useCallback((on: boolean) => {
+    sirenStateRef.current(on);
     if (!sirenRef.current) sirenRef.current = new EmergencySiren();
     if (on) {
       sirenRef.current.start();
@@ -200,10 +212,13 @@ function Dashboard() {
   );
   const updateRoomRef = useRef(updateRoom);
   updateRoomRef.current = updateRoom;
+  sirenStateRef.current = (on: boolean) => {
+    if (!on) void push({ ...state, siren: false });
+  };
   openAllWindowsRef.current = () => {
     const rooms: HomeState["rooms"] = {};
     for (const [id, r] of Object.entries(state.rooms)) rooms[id] = { ...r, window: true };
-    void push({ ...state, rooms });
+    void push({ ...state, rooms, siren: true });
     logActivity("🚨 Emergência: todas as janelas foram abertas", "window");
   };
 
@@ -284,7 +299,7 @@ function Dashboard() {
       setMessages((m) => [...m, userMsg]);
       setAiLoading(true);
       try {
-        const res = await fetch("/api/ai-command", {
+        const res = await authFetch("/api/ai-command", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text, state }),
@@ -293,7 +308,7 @@ function Dashboard() {
         setMessages((m) => [...m, { id: crypto.randomUUID(), role: "assistant", content: data.reply, ts: Date.now() }]);
         void (async () => {
           try {
-            const r = await fetch("/api/tts", {
+            const r = await authFetch("/api/tts", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ text: data.reply }),
@@ -404,7 +419,7 @@ function Dashboard() {
           setAiLoading(true);
           const fd = new FormData();
           fd.append("file", blob, "recording");
-          const res = await fetch("/api/stt", { method: "POST", body: fd });
+          const res = await authFetch("/api/stt", { method: "POST", body: fd });
           if (!res.ok) throw new Error("stt");
           const { text } = (await res.json()) as { text: string };
           const t = text.trim();
@@ -483,8 +498,9 @@ function Dashboard() {
               Fogo
             </button>
             <button
-              onClick={() => {
+              onClick={async () => {
                 const next = !sirenOn;
+                if (!next && !(await confirmCritical("Desligar a sirene"))) return;
                 setSiren(next);
                 logActivity(next ? "Sirene de emergência ATIVADA" : "Sirene de emergência desligada", "scene");
               }}
@@ -533,7 +549,7 @@ function Dashboard() {
                 return [q.id, n];
               }),
             );
-            void push({ rooms });
+            void push({ ...state, rooms });
             logActivity(k === "window" ? `Janelas ${on ? "abertas" : "fechadas"} em toda a casa` : `${k === "light" ? "Luzes" : k === "ac" ? "Ar condicionado" : "Televisões"} ${on ? "ligados" : "desligados"} em toda a casa`, k);
           }}
         />
@@ -772,7 +788,7 @@ function SceneButton({ icon: Icon, label, onClick }: { icon: any; label: string;
   );
 }
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/casa")({
   head: () => ({
     meta: [
       { title: "Ana — Casa Inteligente" },

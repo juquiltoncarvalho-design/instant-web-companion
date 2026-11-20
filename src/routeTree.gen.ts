@@ -9,20 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as PomodoroRouteImport } from './routes/pomodoro'
+import { Route as AuthenticatedCasaRouteImport } from './routes/_authenticated/casa'
+import { Route as AuthenticatedPomodoroRouteImport } from './routes/_authenticated/pomodoro'
 import { Route as ApiAiCommandRouteImport } from './routes/api/ai-command'
 import { Route as ApiPomodoroRouteImport } from './routes/api/pomodoro'
 import { Route as ApiSttRouteImport } from './routes/api/stt'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthenticatedCasaRoute = AuthenticatedCasaRouteImport.update({
+  id: '/_authenticated/casa',
+  path: '/casa',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PomodoroRoute = PomodoroRouteImport.update({
-  id: '/pomodoro',
+const AuthenticatedPomodoroRoute = AuthenticatedPomodoroRouteImport.update({
+  id: '/_authenticated/pomodoro',
   path: '/pomodoro',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -48,16 +48,16 @@ const ApiTtsRoute = ApiTtsRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/pomodoro': typeof PomodoroRoute
+  '/casa': typeof AuthenticatedCasaRoute
+  '/pomodoro': typeof AuthenticatedPomodoroRoute
   '/api/ai-command': typeof ApiAiCommandRoute
   '/api/pomodoro': typeof ApiPomodoroRoute
   '/api/stt': typeof ApiSttRoute
   '/api/tts': typeof ApiTtsRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/pomodoro': typeof PomodoroRoute
+  '/casa': typeof AuthenticatedCasaRoute
+  '/pomodoro': typeof AuthenticatedPomodoroRoute
   '/api/ai-command': typeof ApiAiCommandRoute
   '/api/pomodoro': typeof ApiPomodoroRoute
   '/api/stt': typeof ApiSttRoute
@@ -65,8 +65,8 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/pomodoro': typeof PomodoroRoute
+  '/_authenticated/casa': typeof AuthenticatedCasaRoute
+  '/_authenticated/pomodoro': typeof AuthenticatedPomodoroRoute
   '/api/ai-command': typeof ApiAiCommandRoute
   '/api/pomodoro': typeof ApiPomodoroRoute
   '/api/stt': typeof ApiSttRoute
@@ -75,7 +75,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
+    | '/casa'
     | '/pomodoro'
     | '/api/ai-command'
     | '/api/pomodoro'
@@ -83,7 +83,7 @@ export interface FileRouteTypes {
     | '/api/tts'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
+    | '/casa'
     | '/pomodoro'
     | '/api/ai-command'
     | '/api/pomodoro'
@@ -91,8 +91,8 @@ export interface FileRouteTypes {
     | '/api/tts'
   id:
     | '__root__'
-    | '/'
-    | '/pomodoro'
+    | '/_authenticated/casa'
+    | '/_authenticated/pomodoro'
     | '/api/ai-command'
     | '/api/pomodoro'
     | '/api/stt'
@@ -100,8 +100,8 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  PomodoroRoute: typeof PomodoroRoute
+  AuthenticatedCasaRoute: typeof AuthenticatedCasaRoute
+  AuthenticatedPomodoroRoute: typeof AuthenticatedPomodoroRoute
   ApiAiCommandRoute: typeof ApiAiCommandRoute
   ApiPomodoroRoute: typeof ApiPomodoroRoute
   ApiSttRoute: typeof ApiSttRoute
@@ -110,18 +110,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/_authenticated/casa': {
+      id: '/_authenticated/casa'
+      path: '/casa'
+      fullPath: '/casa'
+      preLoaderRoute: typeof AuthenticatedCasaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pomodoro': {
-      id: '/pomodoro'
+    '/_authenticated/pomodoro': {
+      id: '/_authenticated/pomodoro'
       path: '/pomodoro'
       fullPath: '/pomodoro'
-      preLoaderRoute: typeof PomodoroRouteImport
+      preLoaderRoute: typeof AuthenticatedPomodoroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai-command': {
@@ -156,8 +156,8 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  PomodoroRoute: PomodoroRoute,
+  AuthenticatedCasaRoute: AuthenticatedCasaRoute,
+  AuthenticatedPomodoroRoute: AuthenticatedPomodoroRoute,
   ApiAiCommandRoute: ApiAiCommandRoute,
   ApiPomodoroRoute: ApiPomodoroRoute,
   ApiSttRoute: ApiSttRoute,
