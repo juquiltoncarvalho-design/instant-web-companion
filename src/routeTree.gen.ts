@@ -9,6 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedCasaRouteImport } from './routes/_authenticated/casa'
 import { Route as AuthenticatedPomodoroRouteImport } from './routes/_authenticated/pomodoro'
 import { Route as ApiAiCommandRouteImport } from './routes/api/ai-command'
@@ -16,15 +19,29 @@ import { Route as ApiPomodoroRouteImport } from './routes/api/pomodoro'
 import { Route as ApiSttRouteImport } from './routes/api/stt'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 
-const AuthenticatedCasaRoute = AuthenticatedCasaRouteImport.update({
-  id: '/_authenticated/casa',
-  path: '/casa',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedPomodoroRoute = AuthenticatedPomodoroRouteImport.update({
-  id: '/_authenticated/pomodoro',
-  path: '/pomodoro',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedCasaRoute = AuthenticatedCasaRouteImport.update({
+  id: '/casa',
+  path: '/casa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPomodoroRoute = AuthenticatedPomodoroRouteImport.update({
+  id: '/pomodoro',
+  path: '/pomodoro',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiAiCommandRoute = ApiAiCommandRouteImport.update({
   id: '/api/ai-command',
@@ -48,6 +65,8 @@ const ApiTtsRoute = ApiTtsRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/casa': typeof AuthenticatedCasaRoute
   '/pomodoro': typeof AuthenticatedPomodoroRoute
   '/api/ai-command': typeof ApiAiCommandRoute
@@ -56,6 +75,8 @@ export interface FileRoutesByFullPath {
   '/api/tts': typeof ApiTtsRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/casa': typeof AuthenticatedCasaRoute
   '/pomodoro': typeof AuthenticatedPomodoroRoute
   '/api/ai-command': typeof ApiAiCommandRoute
@@ -65,6 +86,9 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/_authenticated/casa': typeof AuthenticatedCasaRoute
   '/_authenticated/pomodoro': typeof AuthenticatedPomodoroRoute
   '/api/ai-command': typeof ApiAiCommandRoute
@@ -75,6 +99,8 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
+    | '/auth'
     | '/casa'
     | '/pomodoro'
     | '/api/ai-command'
@@ -83,6 +109,8 @@ export interface FileRouteTypes {
     | '/api/tts'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
+    | '/auth'
     | '/casa'
     | '/pomodoro'
     | '/api/ai-command'
@@ -91,6 +119,9 @@ export interface FileRouteTypes {
     | '/api/tts'
   id:
     | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
     | '/_authenticated/casa'
     | '/_authenticated/pomodoro'
     | '/api/ai-command'
@@ -100,8 +131,9 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AuthenticatedCasaRoute: typeof AuthenticatedCasaRoute
-  AuthenticatedPomodoroRoute: typeof AuthenticatedPomodoroRoute
+  IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   ApiAiCommandRoute: typeof ApiAiCommandRoute
   ApiPomodoroRoute: typeof ApiPomodoroRoute
   ApiSttRoute: typeof ApiSttRoute
@@ -110,19 +142,40 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/casa': {
       id: '/_authenticated/casa'
       path: '/casa'
       fullPath: '/casa'
       preLoaderRoute: typeof AuthenticatedCasaRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/pomodoro': {
       id: '/_authenticated/pomodoro'
       path: '/pomodoro'
       fullPath: '/pomodoro'
       preLoaderRoute: typeof AuthenticatedPomodoroRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/ai-command': {
       id: '/api/ai-command'
@@ -155,9 +208,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
-const rootRouteChildren: RootRouteChildren = {
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCasaRoute: typeof AuthenticatedCasaRoute
+  AuthenticatedPomodoroRoute: typeof AuthenticatedPomodoroRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCasaRoute: AuthenticatedCasaRoute,
   AuthenticatedPomodoroRoute: AuthenticatedPomodoroRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   ApiAiCommandRoute: ApiAiCommandRoute,
   ApiPomodoroRoute: ApiPomodoroRoute,
   ApiSttRoute: ApiSttRoute,
