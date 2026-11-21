@@ -1,7 +1,8 @@
 import planta from "@/assets/planta.jpg";
 import { Lightbulb, AppWindow, PanelTopClose, Tv, ChevronRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { ComponentType } from "react";
+import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
+const House3D = lazy(() => import("@/components/house-3d"));
 
 interface Room {
   light: boolean;
@@ -52,6 +53,9 @@ export function FloorPlan({
   onSetDoor: (id: string, open: boolean) => void;
   onSetAll: (key: "light" | "window" | "ac" | "tv", on: boolean) => void;
 }) {
+  const [mode, setMode] = useState<"2d" | "3d">("2d");
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const all = (k: "light" | "window" | "ac" | "tv") =>
     quartos.filter((q) => k !== "tv" || q.tv).some((q) => {
       const r = rooms[q.id];
@@ -85,6 +89,18 @@ export function FloorPlan({
       </nav>
 
       <div className="col-span-12 lg:col-span-7 relative overflow-hidden rounded-2xl border border-border bg-card/60 p-2">
+        <div className="absolute right-4 top-4 z-10 flex gap-1 rounded-full border border-border bg-background/80 p-1 text-xs">
+          {(["2d", "3d"] as const).map((m) => (
+            <button key={m} onClick={() => setMode(m)} className={`rounded-full px-3 py-1 font-medium ${mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>{m.toUpperCase()}</button>
+          ))}
+        </div>
+        {mode === "3d" && mounted ? (
+          <Suspense fallback={<div className="aspect-[846/777] w-full animate-pulse rounded-xl bg-muted" />}>
+            <House3D quartos={quartos} rooms={rooms} lights={POS} windows={WIN} selected={selected} onSelect={onSelect}
+              onToggleLight={onToggleLight} onToggleWindow={(id) => onSetDoor(id, !rooms[id]?.window)} />
+            <p className="mt-2 text-center text-xs text-muted-foreground">Arrasta para rodar, roda do rato para aproximar. Clica nas luzes e janelas.</p>
+          </Suspense>
+        ) : (
         <div className="relative">
           <img src={planta} alt="Planta da casa" className="w-full rounded-xl" />
           {quartos.map((q) => {
@@ -136,6 +152,7 @@ export function FloorPlan({
             );
           })}
         </div>
+        )}
       </div>
 
       <aside className="col-span-12 lg:col-span-3 flex flex-col gap-4">
