@@ -158,6 +158,17 @@ function useHomeState(homeId: string | null) {
 function Dashboard() {
   const homes = useHomes();
   const { state, push } = useHomeState(homes.current?.id ?? null);
+  const [presence, setPresence] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    const hid = homes.current?.id; if (!hid) return;
+    const load = async () => {
+      const { data } = await supabase.from("presence_sensors").select("room, occupied").eq("home_id", hid);
+      setPresence(Object.fromEntries((data ?? []).map((r) => [r.room, r.occupied])));
+    };
+    void load();
+    const ch = supabase.channel(`presence3d_${hid}`).on("postgres_changes", { event: "UPDATE", schema: "public", table: "presence_sensors", filter: `home_id=eq.${hid}` }, () => void load()).subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [homes.current?.id]);
   const canControl = homes.current?.role === "owner" || homes.current?.role === "member";
   const [now, setNow] = useState(new Date());
   const [messages, setMessages] = useState<ChatMsg[]>([
@@ -270,6 +281,18 @@ function Dashboard() {
     updateRoom(roomId, (r) => ({ ...r, tv: { ...r.tv, mute: !r.tv.mute } }));
   };
 
+  const applyScene3D = (scene: "morning" | "cozy" | "cinema" | "night" | "leaving") => {
+    if (scene === "morning" || scene === "night" || scene === "leaving") return applyScene(scene);
+    const rooms: HomeState["rooms"] = {};
+    for (const q of QUARTOS) {
+      const r = state.rooms[q.id] ?? defaultRoom();
+      rooms[q.id] = scene === "cozy"
+        ? { ...r, light: q.id === "sala" || q.id === "quarto1", window: false }
+        : { ...r, light: false, window: false, tv: { ...r.tv, on: q.id === "sala" } };
+    }
+    void push({ ...state, rooms });
+    logActivity(`Cena "${scene === "cozy" ? "aconchego" : "cinema"}" aplicada`, "scene");
+  };
   const applyScene = (scene: "morning" | "night" | "leaving") => {
     const next: HomeState = { ...state, rooms: { ...state.rooms } };
     for (const q of QUARTOS) {
@@ -529,6 +552,9 @@ function Dashboard() {
         </header>
 
         <FloorPlan
+          onToggleTV={toggleTV}
+          onScene={applyScene3D}
+          presence={presence}
           quartos={QUARTOS}
           rooms={state.rooms}
           selected={selectedRoom}
