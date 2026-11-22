@@ -66,16 +66,16 @@ function RoomMesh({ q, room, selected, occupied, onSelect, onLight, onWindow, on
         <planeGeometry args={[w - 0.05, d - 0.05]} />
         <meshStandardMaterial color={FLOORS[q.id] ?? "#555"} emissive={q.cor} emissiveIntensity={selected ? 0.12 : 0} roughness={0.8} />
       </mesh>
-      {[[cx, r.z0, w, t], [cx, r.z1, w, t]].map(([x, z, a, b], i) => <Box key={`h${i}`} p={[x!, H / 2, z!]} s={[a!, H, b!]} c="#e7e2da" />)}
-      {[[r.x0, cz, t, d], [r.x1, cz, t, d]].map(([x, z, a, b], i) => <Box key={`v${i}`} p={[x!, H / 2, z!]} s={[a!, H, b!]} c="#e7e2da" />)}
+      {[[cx, r.z0, w, t], [cx, r.z1, w, t]].map(([x, z, a, b], i) => <Box key={`h${i}`} p={[x!, H / 2, z!]} s={[a!, H, b!]} c="#f1eee8" />)}
+      {[[r.x0, cz, t, d], [r.x1, cz, t, d]].map(([x, z, a, b], i) => <Box key={`v${i}`} p={[x!, H / 2, z!]} s={[a!, H, b!]} c="#f1eee8" />)}
       <Furniture id={q.id} rect={r} tvOn={q.tv && room.tv.on} onTV={onTV} />
       {/* ceiling light */}
       <group position={[cx, H + 0.35, cz]}>
         <mesh onClick={(e) => { e.stopPropagation(); onLight(); }}>
           <sphereGeometry args={[0.16, 24, 24]} />
-          <meshStandardMaterial color={room.light ? q.cor : "#d4d4d8"} emissive={q.cor} emissiveIntensity={room.light ? 3 : 0} />
+          <meshStandardMaterial color={room.light ? "#ffd27a" : "#d4d4d8"} emissive="#ffb347" emissiveIntensity={room.light ? 3 : 0} />
         </mesh>
-        {room.light && <pointLight color={q.cor} intensity={9} distance={5} decay={1.4} position={[0, -0.3, 0]} />}
+        {room.light && <pointLight color="#ffb35c" intensity={9} distance={5} decay={1.4} position={[0, -0.3, 0]} />}
       </group>
       {/* window on outer wall */}
       {(outerZ !== null || outerX !== null) && (
@@ -131,7 +131,7 @@ export default function House3D({ quartos, rooms, presence, selected, onSelect, 
   const shown = quartos.filter((q) => filter === "todos" || q.id === filter);
 
   return (
-    <section className="col-span-12 grid grid-cols-12 overflow-hidden rounded-3xl border border-border bg-card/40">
+    <section className="col-span-12 grid grid-cols-12 overflow-hidden rounded-3xl border border-border bg-[oklch(0.2_0.03_275)]">
       <div className="relative col-span-12 lg:col-span-8 min-h-[520px]">
         <div className="absolute left-4 top-4 z-10">
           <h2 className="text-2xl font-semibold">A minha casa</h2>
@@ -143,11 +143,11 @@ export default function House3D({ quartos, rooms, presence, selected, onSelect, 
         </div>
         <div className="absolute inset-0" data-scene-ready>
           <Canvas shadows camera={{ position: [0, 10, 9], fov: 42 }} dpr={[1, 1.75]}>
-            <color attach="background" args={["#141418"]} />
-            <ambientLight intensity={0.25} />
+            <color attach="background" args={["#1b1d2e"]} />
+            <ambientLight intensity={0.3} color="#8b8fd9" />
             <directionalLight position={[6, 12, 6]} intensity={0.7} castShadow shadow-mapSize={[1024, 1024]} />
             <Environment resolution={64}><Lightformer intensity={0.8} position={[0, 6, 0]} scale={[12, 12, 1]} /></Environment>
-            <mesh rotation-x={-Math.PI / 2} position={[0, -0.01, 0]} receiveShadow><planeGeometry args={[40, 40]} /><meshStandardMaterial color="#1c1c22" /></mesh>
+            <mesh rotation-x={-Math.PI / 2} position={[0, -0.01, 0]} receiveShadow><planeGeometry args={[40, 40]} /><meshStandardMaterial color="#23263b" /></mesh>
             {quartos.map((q) => (
               <RoomMesh key={q.id} q={q} room={get(q.id)} selected={selected === q.id} occupied={!!presence[q.id]}
                 onSelect={() => onSelect(q.id)} onLight={() => { onToggleLight(q.id); onSelect(q.id); }}
@@ -159,7 +159,7 @@ export default function House3D({ quartos, rooms, presence, selected, onSelect, 
         <p className="absolute bottom-3 left-0 right-0 z-10 text-center text-xs text-muted-foreground">Arrasta para rodar · roda para aproximar · clica nas luzes, janelas e TVs</p>
       </div>
 
-      <aside className="col-span-12 lg:col-span-4 flex max-h-[720px] flex-col gap-4 overflow-y-auto border-l border-border bg-background/60 p-4">
+      <aside className="col-span-12 lg:col-span-4 flex max-h-[720px] flex-col gap-4 overflow-y-auto border-l border-border bg-[oklch(0.17_0.03_275)] p-4">
         <div className="grid grid-cols-5 gap-1">
           {SCENES.map(({ k, label, Icon }) => (
             <button key={k} onClick={() => onScene(k)} className="flex flex-col items-center gap-1 rounded-xl p-2 text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground"><Icon className="h-4 w-4" />{label}</button>
@@ -188,10 +188,10 @@ export default function House3D({ quartos, rooms, presence, selected, onSelect, 
             <div key={q.id} className="flex flex-col gap-2">
               <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{q.nome}</h4>
               <div className="grid grid-cols-2 gap-2">
-                <DeviceCard on={r.light} Icon={Lightbulb} title={`Luz — ${q.nome}`} sub={r.light ? "Ligada" : "Desligada"} cor={q.cor} onClick={() => onToggleLight(q.id)} />
-                <DeviceCard on={r.window} Icon={r.window ? AppWindow : PanelTopClose} title="Janela" sub={r.window ? "Aberta" : "Fechada"} cor="oklch(0.78 0.12 220)" onClick={() => onToggleWindow(q.id)} />
-                {q.tv && <DeviceCard on={r.tv.on} Icon={Tv} title="Televisão" sub={r.tv.on ? "Ligada" : "Desligada"} cor="oklch(0.7 0.2 350)" onClick={() => onToggleTV(q.id)} />}
-                <DeviceCard on={!!presence[q.id]} Icon={Users} title="Presença" sub={q.nome} cor="oklch(0.75 0.15 160)" onClick={() => onSelect(q.id)} right={presence[q.id] ? "Movimento" : "Vazio"} />
+                <DeviceCard on={r.light} Icon={Lightbulb} title={`Luz — ${q.nome}`} sub={r.light ? "Ligada" : "Desligada"} cor="oklch(0.85 0.17 85)" onClick={() => onToggleLight(q.id)} />
+                <DeviceCard on={r.window} Icon={r.window ? AppWindow : PanelTopClose} title="Janela" sub={r.window ? "Aberta" : "Fechada"} cor="oklch(0.8 0.12 200)" onClick={() => onToggleWindow(q.id)} />
+                {q.tv && <DeviceCard on={r.tv.on} Icon={Tv} title="Televisão" sub={r.tv.on ? "Ligada" : "Desligada"} cor="oklch(0.7 0.2 0)" onClick={() => onToggleTV(q.id)} />}
+                <DeviceCard on={!!presence[q.id]} Icon={Users} title="Presença" sub={q.nome} cor="oklch(0.78 0.17 145)" onClick={() => onSelect(q.id)} right={presence[q.id] ? "Movimento" : "Vazio"} />
               </div>
             </div>
           );
