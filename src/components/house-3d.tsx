@@ -142,7 +142,7 @@ export default function House3D({ quartos, rooms, presence, selected, onSelect, 
           <button onClick={onAllOff} title="Desligar tudo" className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/40"><Power className="h-4 w-4" /></button>
         </div>
         <div className="absolute inset-0" data-scene-ready>
-          <Canvas shadows camera={{ position: [0, 10, 9], fov: 42 }} dpr={[1, 1.75]}>
+          <Canvas shadows camera={{ position: [0, 13, 12], fov: 45 }} dpr={[1, 1.75]}>
             <color attach="background" args={["#1b1d2e"]} />
             <ambientLight intensity={0.3} color="#8b8fd9" />
             <directionalLight position={[6, 12, 6]} intensity={0.7} castShadow shadow-mapSize={[1024, 1024]} />
@@ -165,7 +165,7 @@ export default function House3D({ quartos, rooms, presence, selected, onSelect, 
             <button key={k} onClick={() => onScene(k)} className="flex flex-col items-center gap-1 rounded-xl p-2 text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground"><Icon className="h-4 w-4" />{label}</button>
           ))}
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex flex-wrap gap-1.5">
           {[{ id: "todos", nome: "Todos" }, ...quartos].map((q) => {
             const n = q.id === "todos" ? 0 : activeCount(q.id);
             return (
