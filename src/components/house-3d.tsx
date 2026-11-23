@@ -1,7 +1,8 @@
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html, Environment, Lightformer, RoundedBox } from "@react-three/drei";
-import { useState, type ComponentType } from "react";
-import { Lightbulb, AppWindow, Tv, Sun, Sofa, Clapperboard, Moon, LogOut, Power, PanelTopClose, Users } from "lucide-react";
+import { useRef, useState, type ComponentType } from "react";
+import type { PointLight, Mesh } from "three";
+import { Lightbulb, AppWindow, Tv, Sun, Sofa, Clapperboard, Moon, LogOut, Power, PanelTopClose, Users, Siren } from "lucide-react";
 
 export interface Room3D { light: boolean; window: boolean; tv: { on: boolean } }
 export interface Quarto3D { id: string; nome: string; cor: string; tv: boolean; Icon: ComponentType<{ className?: string }> }
@@ -34,7 +35,9 @@ function Furniture({ id, rect, tvOn, onTV }: { id: string; rect: Rect; tvOn: boo
     <Box p={[cx, 0.18, cz - 0.4]} s={[1.6, 0.36, 2]} c="#e8e4dc" />
     <Box p={[cx, 0.4, cz - 1.35]} s={[1.6, 0.5, 0.15]} c="#3b2a20" />
     <Box p={[cx - 1.1, 0.2, cz - 1.2]} s={[0.4, 0.4, 0.4]} c="#4a3a2e" />
-    <Box p={[cx, 0.45, rect.z1 - 0.15]} s={[1.1, 0.6, 0.06]} c="#111" e="#60a5fa" ei={tvOn ? 1.6 : 0} onClick={onTV} />
+    <Box p={[cx, 0.2, rect.z1 - 0.25]} s={[1.4, 0.4, 0.35]} c="#2b2b2e" />
+    <Box p={[cx, 0.75, rect.z1 - 0.2]} s={id === "quarto1" ? [1.5, 0.7, 0.06] : [1.1, 0.6, 0.06]} c="#111" e={id === "quarto1" ? "#c084fc" : "#60a5fa"} ei={tvOn ? 1.8 : 0} onClick={onTV} />
+    {tvOn && <pointLight position={[cx, 0.8, rect.z1 - 0.6]} color={id === "quarto1" ? "#c084fc" : "#60a5fa"} intensity={2} distance={2.5} />}
   </>);
   if (id === "sala") return (<>
     <Box p={[cx - 0.8, 0.22, cz + 0.6]} s={[2.4, 0.44, 0.9]} c="#c9c4bb" />
@@ -100,6 +103,25 @@ function RoomMesh({ q, room, selected, occupied, onSelect, onLight, onWindow, on
   );
 }
 
+function SirenBeacon({ on, onClick }: { on: boolean; onClick: () => void }) {
+  const l = useRef<PointLight>(null); const m = useRef<Mesh>(null);
+  useFrame(({ clock }) => {
+    const k = on ? (Math.sin(clock.elapsedTime * 12) > 0 ? 1 : 0.1) : 0;
+    if (l.current) l.current.intensity = k * 25;
+    if (m.current) m.current.rotation.y = clock.elapsedTime * (on ? 8 : 0);
+  });
+  return (
+    <group position={[0, H + 0.3, 0.2]}>
+      <mesh onClick={(e) => { e.stopPropagation(); onClick(); }}><cylinderGeometry args={[0.22, 0.28, 0.12, 24]} /><meshStandardMaterial color="#333" /></mesh>
+      <mesh ref={m} position={[0, 0.18, 0]} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+        <sphereGeometry args={[0.2, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshStandardMaterial color="#ef4444" emissive="#ff2020" emissiveIntensity={on ? 3 : 0.2} transparent opacity={0.9} />
+      </mesh>
+      <pointLight ref={l} color="#ff2a2a" intensity={0} distance={12} decay={1.2} position={[0, 0.4, 0]} />
+    </group>
+  );
+}
+
 const SCENES = [
   { k: "morning", label: "Bom dia", Icon: Sun }, { k: "cozy", label: "Aconchego", Icon: Sofa },
   { k: "cinema", label: "Cinema", Icon: Clapperboard }, { k: "night", label: "Noite", Icon: Moon }, { k: "leaving", label: "Sair de casa", Icon: LogOut },
@@ -117,10 +139,10 @@ function DeviceCard({ on, Icon, title, sub, cor, onClick, right }: { on: boolean
   );
 }
 
-export default function House3D({ quartos, rooms, presence, selected, onSelect, onToggleLight, onToggleWindow, onToggleTV, onScene, onAllOff, onBack }: {
+export default function House3D({ quartos, rooms, presence, selected, onSelect, onToggleLight, onToggleWindow, onToggleTV, onScene, onAllOff, onBack, sirenOn, onSiren }: {
   quartos: readonly Quarto3D[]; rooms: Record<string, Room3D>; presence: Record<string, boolean>; selected: string;
   onSelect: (id: string) => void; onToggleLight: (id: string) => void; onToggleWindow: (id: string) => void; onToggleTV: (id: string) => void;
-  onScene: (s: Scene3D) => void; onAllOff: () => void; onBack: () => void;
+  onScene: (s: Scene3D) => void; onAllOff: () => void; onBack: () => void; sirenOn: boolean; onSiren: () => void;
 }) {
   const [filter, setFilter] = useState<string>("todos");
   const get = (id: string): Room3D => rooms[id] ?? { light: false, window: false, tv: { on: false } };
@@ -139,6 +161,7 @@ export default function House3D({ quartos, rooms, presence, selected, onSelect, 
         </div>
         <div className="absolute right-4 top-4 z-10 flex gap-2">
           <button onClick={onBack} className="rounded-full border border-border bg-background/80 px-3 py-1.5 text-xs font-semibold">Ver em 2D</button>
+          <button onClick={onSiren} title="Sirene" className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${sirenOn ? "animate-pulse bg-destructive text-destructive-foreground" : "border border-destructive/60 bg-background/80 text-destructive"}`}><Siren className="h-4 w-4" />{sirenOn ? "Desligar sirene" : "Sirene"}</button>
           <button onClick={onAllOff} title="Desligar tudo" className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/40"><Power className="h-4 w-4" /></button>
         </div>
         <div className="absolute inset-0" data-scene-ready>
@@ -153,6 +176,7 @@ export default function House3D({ quartos, rooms, presence, selected, onSelect, 
                 onSelect={() => onSelect(q.id)} onLight={() => { onToggleLight(q.id); onSelect(q.id); }}
                 onWindow={() => { onToggleWindow(q.id); onSelect(q.id); }} onTV={() => { if (q.tv) { onToggleTV(q.id); onSelect(q.id); } }} />
             ))}
+            <SirenBeacon on={sirenOn} onClick={onSiren} />
             <OrbitControls maxPolarAngle={Math.PI / 2.2} minDistance={6} maxDistance={22} enableDamping />
           </Canvas>
         </div>

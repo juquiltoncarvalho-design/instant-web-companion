@@ -552,6 +552,8 @@ function Dashboard() {
         </header>
 
         <FloorPlan
+          sirenOn={sirenOn}
+          onSiren={() => setSiren(!sirenOn)}
           onToggleTV={toggleTV}
           onScene={applyScene3D}
           presence={presence}

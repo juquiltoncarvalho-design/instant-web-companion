@@ -48,7 +48,11 @@ export function FloorPlan({
   onToggleTV,
   onScene,
   presence,
+  sirenOn,
+  onSiren,
 }: {
+  sirenOn?: boolean;
+  onSiren?: () => void;
   onToggleTV?: (id: string) => void;
   onScene?: (s: Scene3D) => void;
   presence?: Record<string, boolean>;
@@ -81,7 +85,7 @@ export function FloorPlan({
         <House3D quartos={quartos} rooms={rooms} presence={presence ?? {}} selected={selected} onSelect={onSelect}
           onToggleLight={onToggleLight} onToggleWindow={(id) => onSetDoor(id, !rooms[id]?.window)}
           onToggleTV={(id) => onToggleTV?.(id)} onScene={(s) => onScene?.(s)}
-          onAllOff={() => { onSetAll("light", false); }} onBack={() => setMode("2d")} />
+          onAllOff={() => { onSetAll("light", false); }} onBack={() => setMode("2d")} sirenOn={!!sirenOn} onSiren={() => onSiren?.()} />
       </Suspense>
     );
   }
