@@ -508,7 +508,7 @@ function Dashboard() {
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">{totalRoomsActive} {totalRoomsActive === 1 ? "divisão ativa" : "divisões ativas"}</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
             <button
               onClick={() => {
                 setSiren(true);
@@ -539,13 +539,13 @@ function Dashboard() {
             </button>
             <Link
               to="/pomodoro"
-              className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card hover:bg-accent transition text-sm"
+              className="inline-flex items-center gap-2 px-3 md:px-4 py-2 rounded-full border border-border bg-card hover:bg-accent transition text-sm"
             >
               <Timer className="w-4 h-4" />
-              Pomodoro IoT
+              <span className="hidden sm:inline">Pomodoro IoT</span>
             </Link>
-            <div className="text-right">
-              <div className="text-4xl md:text-5xl font-mono font-light tracking-tighter tabular-nums">{timeStr}</div>
+            <div className="text-right ml-auto">
+              <div className="text-2xl sm:text-3xl md:text-5xl font-mono font-light tracking-tighter tabular-nums">{timeStr}</div>
               <p className="text-muted-foreground text-sm first-letter:uppercase">{dateStr}</p>
             </div>
           </div>

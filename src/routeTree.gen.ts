@@ -12,7 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedCasaRouteImport } from './routes/_authenticated/casa'
+import { Route as AuthenticatedContaRouteImport } from './routes/_authenticated/conta'
+import { Route as AuthenticatedMembrosRouteImport } from './routes/_authenticated/membros'
 import { Route as AuthenticatedPomodoroRouteImport } from './routes/_authenticated/pomodoro'
 import { Route as ApiAiCommandRouteImport } from './routes/api/ai-command'
 import { Route as ApiPomodoroRouteImport } from './routes/api/pomodoro'
@@ -33,9 +38,34 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedCasaRoute = AuthenticatedCasaRouteImport.update({
   id: '/casa',
   path: '/casa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedContaRoute = AuthenticatedContaRouteImport.update({
+  id: '/conta',
+  path: '/conta',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMembrosRoute = AuthenticatedMembrosRouteImport.update({
+  id: '/membros',
+  path: '/membros',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPomodoroRoute = AuthenticatedPomodoroRouteImport.update({
@@ -67,7 +97,12 @@ const ApiTtsRoute = ApiTtsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/casa': typeof AuthenticatedCasaRoute
+  '/conta': typeof AuthenticatedContaRoute
+  '/membros': typeof AuthenticatedMembrosRoute
   '/pomodoro': typeof AuthenticatedPomodoroRoute
   '/api/ai-command': typeof ApiAiCommandRoute
   '/api/pomodoro': typeof ApiPomodoroRoute
@@ -77,7 +112,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/casa': typeof AuthenticatedCasaRoute
+  '/conta': typeof AuthenticatedContaRoute
+  '/membros': typeof AuthenticatedMembrosRoute
   '/pomodoro': typeof AuthenticatedPomodoroRoute
   '/api/ai-command': typeof ApiAiCommandRoute
   '/api/pomodoro': typeof ApiPomodoroRoute
@@ -89,7 +129,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/casa': typeof AuthenticatedCasaRoute
+  '/_authenticated/conta': typeof AuthenticatedContaRoute
+  '/_authenticated/membros': typeof AuthenticatedMembrosRoute
   '/_authenticated/pomodoro': typeof AuthenticatedPomodoroRoute
   '/api/ai-command': typeof ApiAiCommandRoute
   '/api/pomodoro': typeof ApiPomodoroRoute
@@ -101,7 +146,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/privacidade'
+    | '/reset-password'
+    | '/admin'
     | '/casa'
+    | '/conta'
+    | '/membros'
     | '/pomodoro'
     | '/api/ai-command'
     | '/api/pomodoro'
@@ -111,7 +161,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/privacidade'
+    | '/reset-password'
+    | '/admin'
     | '/casa'
+    | '/conta'
+    | '/membros'
     | '/pomodoro'
     | '/api/ai-command'
     | '/api/pomodoro'
@@ -122,7 +177,12 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/privacidade'
+    | '/reset-password'
+    | '/_authenticated/admin'
     | '/_authenticated/casa'
+    | '/_authenticated/conta'
+    | '/_authenticated/membros'
     | '/_authenticated/pomodoro'
     | '/api/ai-command'
     | '/api/pomodoro'
@@ -134,6 +194,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ApiAiCommandRoute: typeof ApiAiCommandRoute
   ApiPomodoroRoute: typeof ApiPomodoroRoute
   ApiSttRoute: typeof ApiSttRoute
@@ -163,11 +225,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/casa': {
       id: '/_authenticated/casa'
       path: '/casa'
       fullPath: '/casa'
       preLoaderRoute: typeof AuthenticatedCasaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/conta': {
+      id: '/_authenticated/conta'
+      path: '/conta'
+      fullPath: '/conta'
+      preLoaderRoute: typeof AuthenticatedContaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/membros': {
+      id: '/_authenticated/membros'
+      path: '/membros'
+      fullPath: '/membros'
+      preLoaderRoute: typeof AuthenticatedMembrosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/pomodoro': {
@@ -209,12 +306,18 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedCasaRoute: typeof AuthenticatedCasaRoute
+  AuthenticatedContaRoute: typeof AuthenticatedContaRoute
+  AuthenticatedMembrosRoute: typeof AuthenticatedMembrosRoute
   AuthenticatedPomodoroRoute: typeof AuthenticatedPomodoroRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedCasaRoute: AuthenticatedCasaRoute,
+  AuthenticatedContaRoute: AuthenticatedContaRoute,
+  AuthenticatedMembrosRoute: AuthenticatedMembrosRoute,
   AuthenticatedPomodoroRoute: AuthenticatedPomodoroRoute,
 }
 
@@ -225,6 +328,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ApiAiCommandRoute: ApiAiCommandRoute,
   ApiPomodoroRoute: ApiPomodoroRoute,
   ApiSttRoute: ApiSttRoute,

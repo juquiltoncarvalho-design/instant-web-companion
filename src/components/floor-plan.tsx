@@ -81,7 +81,7 @@ export function FloorPlan({
 
   if (mode === "3d" && mounted) {
     return (
-      <Suspense fallback={<div className="col-span-12 h-[520px] animate-pulse rounded-3xl bg-muted" />}>
+      <Suspense fallback={<div className="col-span-12 h-[340px] lg:h-[520px] animate-pulse rounded-3xl bg-muted" />}>
         <House3D quartos={quartos} rooms={rooms} presence={presence ?? {}} selected={selected} onSelect={onSelect}
           onToggleLight={onToggleLight} onToggleWindow={(id) => onSetDoor(id, !rooms[id]?.window)}
           onToggleTV={(id) => onToggleTV?.(id)} onScene={(s) => onScene?.(s)}

@@ -154,7 +154,7 @@ export default function House3D({ quartos, rooms, presence, selected, onSelect, 
 
   return (
     <section className="col-span-12 grid grid-cols-12 overflow-hidden rounded-3xl border border-border bg-[oklch(0.2_0.03_275)]">
-      <div className="relative col-span-12 lg:col-span-8 min-h-[520px]">
+      <div className="relative col-span-12 lg:col-span-8 min-h-[340px] lg:min-h-[520px]">
         <div className="absolute left-4 top-4 z-10">
           <h2 className="text-2xl font-semibold">A minha casa</h2>
           <p className="text-sm text-muted-foreground"><span className="text-primary">●</span> {lightsOn} de {quartos.length} luzes acesas · {winOpen} janelas abertas</p>
@@ -184,7 +184,7 @@ export default function House3D({ quartos, rooms, presence, selected, onSelect, 
       </div>
 
       <aside className="col-span-12 lg:col-span-4 flex max-h-[720px] flex-col gap-4 overflow-y-auto border-l border-border bg-[oklch(0.17_0.03_275)] p-4">
-        <div className="grid grid-cols-5 gap-1">
+        <div className="grid grid-cols-3 gap-1 sm:grid-cols-5">
           {SCENES.map(({ k, label, Icon }) => (
             <button key={k} onClick={() => onScene(k)} className="flex flex-col items-center gap-1 rounded-xl p-2 text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground"><Icon className="h-4 w-4" />{label}</button>
           ))}

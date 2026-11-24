@@ -19,6 +19,10 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
 });
 
 export const startInstance = createStart(() => ({
+  // A aplicação inteira corre no navegador (sessão Supabase em localStorage).
+  // Sem isto, o servidor renderiza a página 404 antes do redirecionamento
+  // e aparece "Página não encontrada" ao entrar com a conta.
+  defaultSsr: false,
   functionMiddleware: [attachSupabaseAuth],
   requestMiddleware: [errorMiddleware],
 }));

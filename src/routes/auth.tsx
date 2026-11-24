@@ -1,7 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+
+// Muda para true depois de configurar Google Client ID/Secret no Supabase
+// (Authentication → Providers → Google). Enquanto false, o botão escondido
+// evita o erro "Unsupported provider: missing OAuth secret".
+const GOOGLE_LOGIN_DISPONIVEL = false;
+
 export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({ meta: [
@@ -32,9 +37,20 @@ function AuthPage() {
     }
   };
   const google = async () => {
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (r.error) return setMsg("Não foi possível entrar com Google.");
-    if (!r.redirected) navigate({ to: "/casa" });
+    // OAuth direto do Supabase: funciona no PC, no telemóvel e em qualquer rede,
+    // sem depender do broker do editor do Lovable.
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + "/casa" },
+    });
+    if (error) {
+      const t = error.message ?? "";
+      if (/OAuth secret|Unsupported provider|missing/i.test(t)) {
+        setMsg("O login com Google ainda não está configurado no Supabase. Entra com email e palavra-passe.");
+      } else {
+        setMsg(t);
+      }
+    }
   };
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
@@ -43,8 +59,13 @@ function AuthPage() {
         <input className="w-full rounded-md border border-border bg-background px-3 py-2" type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <input className="w-full rounded-md border border-border bg-background px-3 py-2" type="password" required placeholder="Palavra-passe" value={password} onChange={(e) => setPassword(e.target.value)} />
         <button className="w-full rounded-md bg-primary px-3 py-2 text-primary-foreground">{mode === "in" ? "Entrar" : "Criar conta"}</button>
-        <button type="button" onClick={google} className="w-full rounded-md border border-border px-3 py-2">Continuar com Google</button>
+        {GOOGLE_LOGIN_DISPONIVEL && (
+          <button type="button" onClick={google} className="w-full rounded-md border border-border px-3 py-2">Continuar com Google</button>
+        )}
         <button type="button" className="w-full text-sm text-muted-foreground" onClick={() => setMode(mode === "in" ? "up" : "in")}>{mode === "in" ? "Ainda não tens conta? Criar" : "Já tens conta? Entrar"}</button>
+        {mode === "in" && (
+          <button type="button" onClick={() => navigate({ to: "/reset-password" })} className="w-full text-sm text-muted-foreground underline">Esqueci-me da palavra-passe</button>
+        )}
         {msg && <p className="text-sm text-muted-foreground">{msg}</p>}
       </form>
     </div>

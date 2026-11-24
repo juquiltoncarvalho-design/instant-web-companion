@@ -31,16 +31,27 @@
 //  CONFIGURACAO - ajuste estes valores ao seu ambiente
 // ------------------------------------------------------------
 
-// Credenciais da rede WiFi
-const char *WIFI_SSID = "O_SEU_WIFI";
-const char *WIFI_PASSWORD = "A_SUA_PASSWORD";
+// Redes WiFi por ordem de preferencia.
+// O ESP32 tenta a primeira; se falhar, tenta a seguinte (ex.: hotspot
+// do telemovel quando o WiFi de casa esta em baixo).
+// Preencha o SSID e a password de cada rede que quer usar.
+struct RedeWiFi {
+  const char *ssid;
+  const char *password;
+};
+
+const RedeWiFi REDES_WIFI[] = {
+  { "O_SEU_WIFI", "A_SUA_PASSWORD" },              // 1) WiFi de casa
+  { "HOTSPOT_TELEMOVEL", "PASSWORD_HOTSPOT" },     // 2) Hotspot do telemovel (alternativa)
+};
+const int NUM_REDES = sizeof(REDES_WIFI) / sizeof(REDES_WIFI[0]);
 
 // URL base da API (substitua pelo endereco do seu site/deploy).
 // Em desenvolvimento local, use o IP do computador na rede, ex.:
-//   "http://192.168.1.100:3000"
-// Em producao (Vercel), use o dominio, ex.:
-//   "https://o-seu-projeto.vercel.app"
-const char *API_BASE_URL = "https://o-seu-projeto.vercel.app";
+//   "http://192.168.1.100:8080"
+// Em producao, use o dominio publicado, ex.:
+//   "https://instant-web-companion.lovable.app"
+const char *API_BASE_URL = "https://instant-web-companion.lovable.app";
 
 // Pinos do hardware
 const int PINO_LED = 2;    // LED interno do ESP32 (ou LED externo)
@@ -61,6 +72,12 @@ String estadoAnterior = "idle";  // para detetar a transicao para "finished"
 unsigned long ultimoPolling = 0;
 unsigned long ultimoPiscar = 0;
 bool ledLigado = false;
+
+// Controlo das tentativas de ligacao ao WiFi
+unsigned long ultimaTentativaWiFi = 0;
+const unsigned long INTERVALO_TENTATIVA_WIFI_MS = 5000; // espera entre rondas de tentativas
+const int TENTATIVAS_POR_REDE = 20;                     // 20 x 500 ms = 10 s por rede
+int redeAtual = -1;                                     // indice da rede ligada (-1 = nenhuma)
 
 // ------------------------------------------------------------
 //  SETUP
@@ -83,9 +100,14 @@ void setup() {
 // ------------------------------------------------------------
 
 void loop() {
-  // Reconectar ao WiFi se a ligacao cair
+  // Reconectar ao WiFi se a ligacao cair (com espera entre rondas de tentativas)
   if (WiFi.status() != WL_CONNECTED) {
-    ligarWiFi();
+    redeAtual = -1;
+    unsigned long agora = millis();
+    if (agora - ultimaTentativaWiFi >= INTERVALO_TENTATIVA_WIFI_MS) {
+      ultimaTentativaWiFi = agora;
+      ligarWiFi();
+    }
   }
 
   // Fazer polling ao servidor no intervalo definido
@@ -104,27 +126,40 @@ void loop() {
 // ------------------------------------------------------------
 
 void ligarWiFi() {
-  Serial.print("A ligar ao WiFi: ");
-  Serial.println(WIFI_SSID);
-
   WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  int tentativas = 0;
-  while (WiFi.status() != WL_CONNECTED && tentativas < 40) {
-    delay(500);
-    Serial.print(".");
-    tentativas++;
+  // Tenta cada rede por ordem de preferencia (casa -> hotspot do telemovel).
+  for (int i = 0; i < NUM_REDES; i++) {
+    Serial.print("A ligar ao WiFi: ");
+    Serial.println(REDES_WIFI[i].ssid);
+
+    WiFi.disconnect();
+    WiFi.begin(REDES_WIFI[i].ssid, REDES_WIFI[i].password);
+
+    int tentativas = 0;
+    while (WiFi.status() != WL_CONNECTED && tentativas < TENTATIVAS_POR_REDE) {
+      delay(500);
+      Serial.print(".");
+      tentativas++;
+    }
+
+    if (WiFi.status() == WL_CONNECTED) {
+      redeAtual = i;
+      Serial.println();
+      Serial.print("WiFi ligado (");
+      Serial.print(REDES_WIFI[i].ssid);
+      Serial.print("). IP: ");
+      Serial.println(WiFi.localIP());
+      return;
+    }
+
+    Serial.println();
+    Serial.print("Falha na rede ");
+    Serial.print(REDES_WIFI[i].ssid);
+    Serial.println(". A tentar a seguinte...");
   }
 
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println();
-    Serial.print("WiFi ligado. IP: ");
-    Serial.println(WiFi.localIP());
-  } else {
-    Serial.println();
-    Serial.println("Falha ao ligar ao WiFi. Nova tentativa mais tarde.");
-  }
+  Serial.println("Nenhuma rede disponivel. Nova tentativa mais tarde.");
 }
 
 // ------------------------------------------------------------

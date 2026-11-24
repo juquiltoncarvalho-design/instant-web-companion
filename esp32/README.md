@@ -45,15 +45,33 @@ segundos, o site passa a mostrar **OFFLINE**.
 Antes de carregar o codigo, edite as constantes no topo de `pomodoro_esp32.ino`:
 
 ```cpp
-const char *WIFI_SSID = "O_SEU_WIFI";
-const char *WIFI_PASSWORD = "A_SUA_PASSWORD";
-const char *API_BASE_URL = "https://o-seu-projeto.vercel.app";
+const RedeWiFi REDES_WIFI[] = {
+  { "O_SEU_WIFI", "A_SUA_PASSWORD" },           // 1) WiFi de casa
+  { "HOTSPOT_TELEMOVEL", "PASSWORD_HOTSPOT" },  // 2) Hotspot do telemovel
+};
+
+const char *API_BASE_URL = "https://instant-web-companion.lovable.app";
 ```
 
-- Em **desenvolvimento local**, use o IP do seu computador na rede local e a
-  porta do Next.js, por exemplo `http://192.168.1.100:3000`. O telemovel/ESP32
-  e o computador tem de estar na mesma rede WiFi.
-- Em **producao**, use o dominio do deploy (Vercel).
+### Redes por ordem de preferencia (fallback)
+
+O ESP32 tenta as redes pela ordem da lista. Se o **WiFi de casa** estiver
+em baixo, ele liga automaticamente ao **hotspot do telemovel**. Assim pode
+continuar a controlar a casa pela rede do telemovel sem ficar offline.
+
+- Preencha o SSID e a password de cada rede que quer usar.
+- Pode adicionar mais redes a lista (ex.: outro router, repetidor).
+- Para usar o hotspot: ative o "Ponto de acesso / Hotspot" no telemovel e
+  copie o nome da rede e a password para a segunda entrada da lista.
+- Se so quiser uma rede, basta deixar uma entrada na lista.
+
+### URL da API
+
+- Em **producao**, use o dominio publicado, ex.:
+  `https://instant-web-companion.lovable.app`.
+- Em **desenvolvimento local**, use o IP do seu computador na rede local,
+  por exemplo `http://192.168.1.100:8080`. O telemovel/ESP32 e o computador
+  tem de estar na mesma rede WiFi (ou no mesmo hotspot).
 
 ## Bibliotecas necessarias
 
