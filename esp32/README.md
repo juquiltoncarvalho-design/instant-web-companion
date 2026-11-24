@@ -50,7 +50,7 @@ const RedeWiFi REDES_WIFI[] = {
   { "HOTSPOT_TELEMOVEL", "PASSWORD_HOTSPOT" },  // 2) Hotspot do telemovel
 };
 
-const char *API_BASE_URL = "https://instant-web-companion.lovable.app";
+const char *API_BASE_URL = "https://instant-web-companion.vercel.app";
 ```
 
 ### Redes por ordem de preferencia (fallback)
@@ -68,7 +68,7 @@ continuar a controlar a casa pela rede do telemovel sem ficar offline.
 ### URL da API
 
 - Em **producao**, use o dominio publicado, ex.:
-  `https://instant-web-companion.lovable.app`.
+  `https://instant-web-companion.vercel.app`.
 - Em **desenvolvimento local**, use o IP do seu computador na rede local,
   por exemplo `http://192.168.1.100:8080`. O telemovel/ESP32 e o computador
   tem de estar na mesma rede WiFi (ou no mesmo hotspot).
