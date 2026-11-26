@@ -60,7 +60,7 @@ const int NUM_REDES = sizeof(REDES_WIFI) / sizeof(REDES_WIFI[0]);
 // Em desenvolvimento local, use o IP do computador na rede, ex.:
 //   "http://192.168.1.100:8080"
 // Em producao, use o dominio publicado, ex.:
-//   "https://instant-web-companion.lovable.app"
+//   "https://instant-web-companion.vercel.app"
 const char *API_BASE_URL = "https://instant-web-companion.vercel.app";
 
 // Pinos do hardware
