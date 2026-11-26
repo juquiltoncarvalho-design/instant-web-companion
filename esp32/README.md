@@ -42,12 +42,23 @@ segundos, o site passa a mostrar **OFFLINE**.
 
 ## Configuracao
 
-Antes de carregar o codigo, edite as constantes no topo de `pomodoro_esp32.ino`:
+As credenciais WiFi estao no ficheiro `secrets.h`, na mesma pasta do `.ino`.
+Esse ficheiro **nao e enviado para o GitHub** (contem a palavra-passe da rede).
+Se usar o projeto noutro computador, crie `esp32/secrets.h` com:
+
+```cpp
+#define WIFI_SSID "nome_da_rede"
+#define WIFI_PASSWORD "palavra_passe"
+#define HOTSPOT_SSID "HOTSPOT_TELEMOVEL"
+#define HOTSPOT_PASSWORD "PASSWORD_HOTSPOT"
+```
+
+O `.ino` usa esses valores e mantem a URL da API:
 
 ```cpp
 const RedeWiFi REDES_WIFI[] = {
-  { "O_SEU_WIFI", "A_SUA_PASSWORD" },           // 1) WiFi de casa
-  { "HOTSPOT_TELEMOVEL", "PASSWORD_HOTSPOT" },  // 2) Hotspot do telemovel
+  { WIFI_SSID, WIFI_PASSWORD },           // 1) WiFi de casa
+  { HOTSPOT_SSID, HOTSPOT_PASSWORD },     // 2) Hotspot do telemovel
 };
 
 const char *API_BASE_URL = "https://instant-web-companion.vercel.app";

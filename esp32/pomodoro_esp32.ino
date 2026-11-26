@@ -34,15 +34,25 @@
 // Redes WiFi por ordem de preferencia.
 // O ESP32 tenta a primeira; se falhar, tenta a seguinte (ex.: hotspot
 // do telemovel quando o WiFi de casa esta em baixo).
-// Preencha o SSID e a password de cada rede que quer usar.
+// As credenciais reais estao em secrets.h (ficheiro local, nao versionado).
+// Se esse ficheiro nao existir, usa os valores de exemplo abaixo.
+#if __has_include("secrets.h")
+#include "secrets.h"
+#else
+#define WIFI_SSID "O_SEU_WIFI"
+#define WIFI_PASSWORD "A_SUA_PASSWORD"
+#define HOTSPOT_SSID "HOTSPOT_TELEMOVEL"
+#define HOTSPOT_PASSWORD "PASSWORD_HOTSPOT"
+#endif
+
 struct RedeWiFi {
   const char *ssid;
   const char *password;
 };
 
 const RedeWiFi REDES_WIFI[] = {
-  { "O_SEU_WIFI", "A_SUA_PASSWORD" },              // 1) WiFi de casa
-  { "HOTSPOT_TELEMOVEL", "PASSWORD_HOTSPOT" },     // 2) Hotspot do telemovel (alternativa)
+  { WIFI_SSID, WIFI_PASSWORD },              // 1) WiFi de casa
+  { HOTSPOT_SSID, HOTSPOT_PASSWORD },        // 2) Hotspot do telemovel (alternativa)
 };
 const int NUM_REDES = sizeof(REDES_WIFI) / sizeof(REDES_WIFI[0]);
 

@@ -35,3 +35,6 @@ dist-ssr
 .vercel
 
 package-lock.json
+
+# Credenciais WiFi locais do ESP32 (nao versionar)
+esp32/secrets.h
